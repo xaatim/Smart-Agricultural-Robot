@@ -1,0 +1,1983 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SASI-Bot Dashboard - Smart Agricultural Surveillance</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-cyan: #00ffff;
+            --secondary-cyan: #00d4ff;
+            --accent-purple: #8a2be2;
+            --neon-green: #39ff14;
+            --electric-blue: #0080ff;
+            --hot-pink: #ff1493;
+            --dark-bg: #0a0a0f;
+            --darker-bg: #050508;
+            --card-bg: rgba(15, 15, 25, 0.8);
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --border-glow: rgba(0, 255, 255, 0.3);
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
+            --text-accent: #00ffff;
+            --danger-red: #ff073a;
+            --warning-orange: #ff8c00;
+            --success-green: #00ff41;
+        }
+
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background: var(--dark-bg);
+            background-image: 
+                radial-gradient(circle at 20% 80%, rgba(138, 43, 226, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(0, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(57, 255, 20, 0.05) 0%, transparent 50%);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Animated background particles */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(2px 2px at 20px 30px, rgba(0, 255, 255, 0.3), transparent),
+                radial-gradient(2px 2px at 40px 70px, rgba(138, 43, 226, 0.3), transparent),
+                radial-gradient(1px 1px at 90px 40px, rgba(57, 255, 20, 0.3), transparent),
+                radial-gradient(1px 1px at 130px 80px, rgba(255, 20, 147, 0.3), transparent);
+            background-repeat: repeat;
+            background-size: 200px 200px;
+            animation: sparkle 20s linear infinite;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        @keyframes sparkle {
+            0% { transform: translateY(0px); }
+            100% { transform: translateY(-200px); }
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--darker-bg) 0%, rgba(15, 15, 25, 0.95) 100%);
+            backdrop-filter: blur(20px);
+            border-bottom: 2px solid var(--border-glow);
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.2);
+            color: var(--text-primary);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo i {
+            font-size: 2.5rem;
+            color: var(--primary-cyan);
+            text-shadow: 0 0 20px var(--primary-cyan);
+            animation: glow-pulse 2s ease-in-out infinite alternate;
+        }
+
+        .logo h1 {
+            font-family: 'Orbitron', monospace;
+            font-size: 2rem;
+            font-weight: 900;
+            background: linear-gradient(45deg, var(--primary-cyan), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
+        }
+
+        @keyframes glow-pulse {
+            0% { text-shadow: 0 0 20px var(--primary-cyan); }
+            100% { text-shadow: 0 0 30px var(--primary-cyan), 0 0 40px var(--primary-cyan); }
+        }
+
+        .system-status {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1rem;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            background: var(--glass-bg);
+            border: 1px solid var(--border-glow);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .status-online {
+            color: var(--success-green);
+            text-shadow: 0 0 10px var(--success-green);
+            animation: pulse-glow 2s infinite;
+        }
+        .status-good {
+            color: var(--neon-green);
+            text-shadow: 0 0 10px var(--neon-green);
+        }
+        .status-warning {
+            color: var(--warning-orange);
+            text-shadow: 0 0 10px var(--warning-orange);
+        }
+        .status-error {
+            color: var(--danger-red);
+            text-shadow: 0 0 10px var(--danger-red);
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { 
+                text-shadow: 0 0 10px var(--success-green);
+                transform: scale(1);
+            }
+            50% { 
+                text-shadow: 0 0 20px var(--success-green), 0 0 30px var(--success-green);
+                transform: scale(1.05);
+            }
+        }
+
+        /* Dashboard Layout */
+        .dashboard {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            grid-template-rows: auto auto;
+            gap: 2rem;
+            grid-template-areas:
+                "video controls"
+                "data data";
+        }
+
+        .video-section {
+            grid-area: video;
+        }
+
+        .control-section {
+            grid-area: controls;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .data-section {
+            grid-area: data;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 1.5rem;
+        }
+
+        /* Futuristic Cards */
+        .video-container,
+        .control-panel,
+        .data-panel {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-glow);
+            border-radius: 15px;
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .video-container::before,
+        .control-panel::before,
+        .data-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.1), transparent);
+            animation: scan-line 3s infinite;
+            pointer-events: none;
+        }
+
+        @keyframes scan-line {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        /* Video Section */
+        .video-header {
+            background: linear-gradient(135deg, var(--accent-purple) 0%, var(--electric-blue) 100%);
+            color: white;
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-glow);
+        }
+
+        .video-header h2 {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.3rem;
+            font-weight: 700;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+
+        .video-controls {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-icon {
+            background: var(--glass-bg);
+            border: 1px solid var(--border-glow);
+            color: var(--primary-cyan);
+            padding: 0.7rem;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            font-size: 1.1rem;
+        }
+
+        .btn-icon:hover {
+            background: rgba(0, 255, 255, 0.1);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .video-feed {
+            position: relative;
+            background: var(--darker-bg);
+            aspect-ratio: 4 / 3;
+            border: 2px solid var(--border-glow);
+            margin: 1rem;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .video-feed img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: contrast(1.1) brightness(1.1);
+        }
+
+        .detection-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+        }
+
+        .detection-box {
+            position: absolute;
+            border: 2px solid var(--neon-green);
+            background: rgba(57, 255, 20, 0.1);
+            border-radius: 8px;
+            box-shadow: 
+                0 0 20px rgba(57, 255, 20, 0.3),
+                inset 0 0 20px rgba(57, 255, 20, 0.1);
+            animation: detection-pulse 2s infinite;
+        }
+
+        @keyframes detection-pulse {
+            0%, 100% { 
+                border-color: var(--neon-green);
+                box-shadow: 0 0 20px rgba(57, 255, 20, 0.3);
+            }
+            50% { 
+                border-color: var(--primary-cyan);
+                box-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
+            }
+        }
+
+        .detection-label {
+            position: absolute;
+            top: -30px;
+            left: 0;
+            background: linear-gradient(45deg, var(--neon-green), var(--primary-cyan));
+            color: var(--darker-bg);
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            box-shadow: 0 0 15px rgba(57, 255, 20, 0.5);
+        }
+
+        .video-info {
+            padding: 1rem 1.5rem;
+            background: var(--glass-bg);
+            display: flex;
+            justify-content: space-between;
+            border-top: 1px solid var(--border-glow);
+            backdrop-filter: blur(10px);
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .info-item .label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .info-item .value {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--primary-cyan);
+            text-shadow: 0 0 10px var(--primary-cyan);
+        }
+
+        /* Control Panel Headers */
+        .control-panel h3,
+        .data-panel h3 {
+            color: var(--primary-cyan);
+            margin-bottom: 1.5rem;
+            font-family: 'Orbitron', monospace;
+            font-size: 1.2rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-shadow: 0 0 10px var(--primary-cyan);
+            padding: 1.5rem 1.5rem 0;
+        }
+
+        .control-panel,
+        .data-panel {
+            padding: 0 1.5rem 1.5rem;
+        }
+
+        /* Joystick Control */
+        .joystick-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .joystick {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 0.8rem;
+            width: 180px;
+            height: 180px;
+            padding: 1rem;
+            background: var(--glass-bg);
+            border: 2px solid var(--border-glow);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.2);
+        }
+
+        .direction-btn {
+            background: linear-gradient(135deg, var(--electric-blue) 0%, var(--primary-cyan) 100%);
+            border: 2px solid var(--primary-cyan);
+            border-radius: 12px;
+            color: white;
+            font-size: 1.4rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .direction-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .direction-btn:hover::before {
+            left: 100%;
+        }
+
+        .direction-btn:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 0 25px rgba(0, 255, 255, 0.6);
+            text-shadow: 0 0 10px white;
+        }
+
+        .direction-btn:active {
+            transform: translateY(0) scale(0.95);
+            box-shadow: 0 0 35px rgba(0, 255, 255, 0.8);
+        }
+
+        .direction-btn.up { grid-column: 2; grid-row: 1; }
+        .direction-btn.left { grid-column: 1; grid-row: 2; }
+        .direction-btn.center { 
+            grid-column: 2; 
+            grid-row: 2; 
+            background: linear-gradient(135deg, var(--danger-red) 0%, var(--hot-pink) 100%);
+            border-color: var(--danger-red);
+            box-shadow: 0 0 15px rgba(255, 7, 58, 0.3);
+        }
+        .direction-btn.center:hover {
+            box-shadow: 0 0 25px rgba(255, 7, 58, 0.6);
+        }
+        .direction-btn.right { grid-column: 3; grid-row: 2; }
+        .direction-btn.down { grid-column: 2; grid-row: 3; }
+
+        /* Futuristic Sliders */
+        .speed-control,
+        .pressure-control {
+            margin-bottom: 1.5rem;
+        }
+
+        .speed-control label,
+        .pressure-control label {
+            display: block;
+            margin-bottom: 0.8rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.9rem;
+        }
+
+        .slider {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: var(--darker-bg);
+            border: 1px solid var(--border-glow);
+            outline: none;
+            -webkit-appearance: none;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, var(--primary-cyan), var(--electric-blue));
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+            border: 2px solid var(--primary-cyan);
+        }
+
+        .slider::-webkit-slider-thumb:hover {
+            box-shadow: 0 0 25px rgba(0, 255, 255, 0.8);
+            transform: scale(1.1);
+        }
+
+        .slider::-moz-range-thumb {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, var(--primary-cyan), var(--electric-blue));
+            cursor: pointer;
+            border: 2px solid var(--primary-cyan);
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+        }
+
+        /* Futuristic Buttons */
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border: 2px solid;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.9rem;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--success-green) 0%, var(--neon-green) 100%);
+            border-color: var(--success-green);
+            color: var(--darker-bg);
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.3);
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 0 30px rgba(0, 255, 65, 0.6);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: var(--glass-bg);
+            border-color: var(--primary-cyan);
+            color: var(--primary-cyan);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(0, 255, 255, 0.1);
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--danger-red) 0%, var(--hot-pink) 100%);
+            border-color: var(--danger-red);
+            color: white;
+            box-shadow: 0 0 20px rgba(255, 7, 58, 0.3);
+        }
+
+        .btn-danger:hover {
+            box-shadow: 0 0 30px rgba(255, 7, 58, 0.6);
+            transform: translateY(-2px);
+        }
+
+        .btn-small {
+            padding: 0.5rem 1rem;
+            font-size: 0.8rem;
+            border-radius: 15px;
+        }
+
+        .control-buttons,
+        .water-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        /* Watering Presets */
+        .watering-presets {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .preset-btn {
+            background: var(--glass-bg);
+            border: 2px solid var(--border-glow);
+            border-radius: 15px;
+            padding: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .preset-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent, rgba(0, 255, 255, 0.05), transparent);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .preset-btn:hover::before {
+            opacity: 1;
+        }
+
+        .preset-btn:hover {
+            border-color: var(--primary-cyan);
+            box-shadow: 0 0 25px rgba(0, 255, 255, 0.3);
+            transform: translateY(-3px);
+        }
+
+        .preset-btn.active {
+            border-color: var(--neon-green);
+            background: rgba(57, 255, 20, 0.1);
+            box-shadow: 0 0 25px rgba(57, 255, 20, 0.4);
+        }
+
+        .preset-btn i {
+            font-size: 2rem;
+            color: var(--primary-cyan);
+            text-shadow: 0 0 15px var(--primary-cyan);
+        }
+
+        .preset-btn span {
+            font-weight: 600;
+            color: var(--text-primary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .preset-btn small {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* Water Controls */
+        .water-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid var(--border-glow);
+            border-radius: 10px;
+            font-size: 1rem;
+            background: var(--glass-bg);
+            color: var(--text-primary);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--primary-cyan);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+        }
+
+        .water-status {
+            text-align: center;
+        }
+
+        .status-bar {
+            width: 100%;
+            height: 12px;
+            background: var(--darker-bg);
+            border: 1px solid var(--border-glow);
+            border-radius: 6px;
+            overflow: hidden;
+            margin-bottom: 0.8rem;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .status-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--neon-green) 0%, var(--primary-cyan) 100%);
+            transition: width 0.3s ease;
+            box-shadow: 0 0 15px rgba(57, 255, 20, 0.5);
+            animation: flow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes flow {
+            0% { box-shadow: 0 0 15px rgba(57, 255, 20, 0.5); }
+            100% { box-shadow: 0 0 25px rgba(0, 255, 255, 0.7); }
+        }
+
+        /* Detection List */
+        .detection-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .detection-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            border: 1px solid var(--border-glow);
+            border-radius: 12px;
+            margin-bottom: 0.8rem;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .detection-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: linear-gradient(180deg, var(--neon-green), var(--primary-cyan));
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .detection-item:hover::before {
+            opacity: 1;
+        }
+
+        .detection-item:hover {
+            background: rgba(0, 255, 255, 0.05);
+            border-color: var(--primary-cyan);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.2);
+            transform: translateX(5px);
+        }
+
+        .detection-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--neon-green) 0%, var(--primary-cyan) 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--darker-bg);
+            font-size: 1.4rem;
+            box-shadow: 0 0 20px rgba(57, 255, 20, 0.4);
+        }
+
+        .detection-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+        }
+
+        .plant-name {
+            font-weight: 700;
+            color: var(--text-primary);
+            font-size: 1.1rem;
+        }
+
+        .confidence {
+            font-size: 1rem;
+            color: var(--success-green);
+            font-weight: 600;
+            text-shadow: 0 0 10px var(--success-green);
+        }
+
+        .timestamp {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .detection-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        /* Activity Log */
+        .log-container {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .log-entry {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.8rem;
+            border-bottom: 1px solid var(--border-glow);
+            transition: all 0.3s ease;
+        }
+
+        .log-entry:hover {
+            background: var(--glass-bg);
+            padding-left: 1.2rem;
+        }
+
+        .log-entry:last-child {
+            border-bottom: none;
+        }
+
+        .log-time {
+            font-family: 'Orbitron', monospace;
+            font-size: 0.9rem;
+            color: var(--primary-cyan);
+            min-width: 90px;
+            text-shadow: 0 0 10px var(--primary-cyan);
+        }
+
+        .log-action {
+            flex: 1;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        .log-action.watered { 
+            color: var(--electric-blue);
+            text-shadow: 0 0 10px var(--electric-blue);
+        }
+        .log-action.detected { 
+            color: var(--success-green);
+            text-shadow: 0 0 10px var(--success-green);
+        }
+        .log-action.moved { 
+            color: var(--warning-orange);
+            text-shadow: 0 0 10px var(--warning-orange);
+        }
+        .log-action.system { 
+            color: var(--text-secondary);
+        }
+
+        /* Statistics */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1.2rem;
+            background: var(--glass-bg);
+            border: 1px solid var(--border-glow);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--neon-green), var(--primary-cyan), var(--accent-purple));
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .stat-item:hover::before {
+            opacity: 1;
+        }
+
+        .stat-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0 25px rgba(0, 255, 255, 0.3);
+        }
+
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--primary-cyan) 0%, var(--accent-purple) 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.4rem;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.4);
+        }
+
+        .stat-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 900;
+            font-family: 'Orbitron', monospace;
+            color: var(--primary-cyan);
+            text-shadow: 0 0 15px var(--primary-cyan);
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Footer */
+        .footer {
+            background: linear-gradient(135deg, var(--darker-bg) 0%, rgba(15, 15, 25, 0.95) 100%);
+            backdrop-filter: blur(20px);
+            border-top: 2px solid var(--border-glow);
+            color: var(--text-primary);
+            padding: 2rem 0;
+            margin-top: 3rem;
+        }
+
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .footer-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            border: 1px solid transparent;
+        }
+
+        .footer-links a:hover {
+            color: var(--primary-cyan);
+            text-shadow: 0 0 10px var(--primary-cyan);
+            border-color: var(--border-glow);
+            background: var(--glass-bg);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+                grid-template-areas:
+                    "video"
+                    "controls"
+                    "data";
+            }
+
+            .control-section {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                gap: 1.5rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .system-status {
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+
+            .dashboard {
+                padding: 0 1rem;
+                gap: 1rem;
+            }
+
+            .data-section {
+                grid-template-columns: 1fr;
+            }
+
+            .watering-presets {
+                grid-template-columns: 1fr;
+            }
+
+            .water-controls {
+                grid-template-columns: 1fr;
+            }
+
+            .control-buttons,
+            .water-buttons {
+                flex-direction: column;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .footer-content {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .logo h1 {
+                font-size: 1.5rem;
+            }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--darker-bg);
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, var(--primary-cyan), var(--accent-purple));
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+        }
+
+        /* Additional Glow Effects */
+        .glow-text {
+            text-shadow: 0 0 10px currentColor;
+        }
+
+        .hologram-effect {
+            position: relative;
+        }
+
+        .hologram-effect::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(
+                45deg,
+                transparent 30%,
+                rgba(0, 255, 255, 0.1) 50%,
+                transparent 70%
+            );
+            pointer-events: none;
+            animation: hologram-scan 3s infinite;
+        }
+
+        @keyframes hologram-scan {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <i class="fas fa-robot"></i>
+                <h1>SASI-Bot Control Center</h1>
+            </div>
+            <div class="system-status">
+                <div class="status-item">
+                    <i class="fas fa-wifi status-online"></i>
+                    <span>CONNECTED</span>
+                </div>
+                <div class="status-item">
+                    <i class="fas fa-battery-three-quarters status-good"></i>
+                    <span id="batteryLevel">78%</span>
+                </div>
+                <div class="status-item">
+                    <i class="fas fa-thermometer-half"></i>
+                    <span id="temperature">24°C</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Dashboard -->
+    <main class="dashboard">
+        <!-- Video Feed Section -->
+        <section class="video-section">
+            <div class="video-container hologram-effect">
+                <div class="video-header">
+                    <h2><i class="fas fa-video"></i> LIVE CAMERA FEED</h2>
+                    <div class="video-controls">
+                        <button class="btn-icon" id="recordBtn">
+                            <i class="fas fa-record-vinyl"></i>
+                        </button>
+                        <button class="btn-icon" id="screenshotBtn">
+                            <i class="fas fa-camera"></i>
+                        </button>
+                        <button class="btn-icon" id="fullscreenBtn">
+                            <i class="fas fa-expand"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="video-feed">
+                    <img id="videoStream" src="/placeholder.svg?height=480&width=640" alt="Live Camera Feed">
+                    <div class="detection-overlay">
+                        <div class="detection-box" style="top: 30%; left: 20%; width: 25%; height: 20%;">
+                            <span class="detection-label">CHILI PLANT - 94%</span>
+                        </div>
+                        <div class="detection-box" style="top: 50%; left: 60%; width: 20%; height: 15%;">
+                            <span class="detection-label">SPINACH - 87%</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="video-info">
+                    <div class="info-item">
+                        <span class="label">Resolution</span>
+                        <span class="value">640x480</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">FPS</span>
+                        <span class="value">15</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Detected</span>
+                        <span class="value" id="detectedCount">2</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Control Panels -->
+        <section class="control-section">
+            <!-- Movement Control -->
+            <div class="control-panel">
+                <h3><i class="fas fa-gamepad"></i> Movement Control</h3>
+                <div class="joystick-container">
+                    <div class="joystick">
+                        <button class="direction-btn up" data-direction="forward">
+                            <i class="fas fa-chevron-up"></i>
+                        </button>
+                        <button class="direction-btn left" data-direction="left">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <button class="direction-btn center" data-direction="stop">
+                            <i class="fas fa-stop"></i>
+                        </button>
+                        <button class="direction-btn right" data-direction="right">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                        <button class="direction-btn down" data-direction="backward">
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="speed-control">
+                    <label for="speedSlider">Speed: <span id="speedValue" class="glow-text">50</span>%</label>
+                    <input type="range" id="speedSlider" min="10" max="100" value="50" class="slider">
+                </div>
+                <div class="control-buttons">
+                    <button class="btn btn-secondary" id="autoModeBtn">
+                        <i class="fas fa-magic"></i> Auto Mode
+                    </button>
+                    <button class="btn btn-danger" id="emergencyStopBtn">
+                        <i class="fas fa-hand-paper"></i> Emergency Stop
+                    </button>
+                </div>
+            </div>
+
+            <!-- Watering Control -->
+            <div class="control-panel">
+                <h3><i class="fas fa-tint"></i> Watering System</h3>
+                <div class="watering-presets">
+                    <button class="preset-btn" data-crop="chili">
+                        <i class="fas fa-pepper-hot"></i>
+                        <span>Chili</span>
+                        <small>150ml</small>
+                    </button>
+                    <button class="preset-btn" data-crop="spinach">
+                        <i class="fas fa-leaf"></i>
+                        <span>Spinach</span>
+                        <small>100ml</small>
+                    </button>
+                    <button class="preset-btn" data-crop="tomato">
+                        <i class="fas fa-apple-alt"></i>
+                        <span>Tomato</span>
+                        <small>200ml</small>
+                    </button>
+                    <button class="preset-btn" data-crop="custom">
+                        <i class="fas fa-cog"></i>
+                        <span>Custom</span>
+                        <small>Manual</small>
+                    </button>
+                </div>
+                <div class="water-controls">
+                    <div class="water-amount">
+                        <label for="waterAmount">Amount (ml):</label>
+                        <input type="number" id="waterAmount" min="10" max="500" value="150" class="input-field">
+                    </div>
+                    <div class="pressure-control">
+                        <label for="pressureSlider">Pressure: <span id="pressureValue" class="glow-text">3</span></label>
+                        <input type="range" id="pressureSlider" min="1" max="5" value="3" class="slider">
+                    </div>
+                </div>
+                <div class="water-buttons">
+                    <button class="btn btn-primary" id="waterBtn">
+                        <i class="fas fa-play"></i> Start Watering
+                    </button>
+                    <button class="btn btn-secondary" id="stopWaterBtn">
+                        <i class="fas fa-stop"></i> Stop
+                    </button>
+                </div>
+                <div class="water-status">
+                    <div class="status-bar">
+                        <div class="status-fill" style="width: 65%"></div>
+                    </div>
+                    <span class="glow-text">Water Tank: 65% (3.2L remaining)</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Data Panels -->
+        <section class="data-section">
+            <!-- Detection History -->
+            <div class="data-panel">
+                <h3><i class="fas fa-search"></i> Plant Detection History</h3>
+                <div class="detection-list">
+                    <div class="detection-item">
+                        <div class="detection-icon">
+                            <i class="fas fa-pepper-hot"></i>
+                        </div>
+                        <div class="detection-info">
+                            <span class="plant-name">Chili Plant</span>
+                            <span class="confidence">94% confidence</span>
+                            <span class="timestamp">2 min ago</span>
+                        </div>
+                        <div class="detection-actions">
+                            <button class="btn-small btn-primary">Water</button>
+                            <button class="btn-small btn-secondary">Navigate</button>
+                        </div>
+                    </div>
+                    <div class="detection-item">
+                        <div class="detection-icon">
+                            <i class="fas fa-leaf"></i>
+                        </div>
+                        <div class="detection-info">
+                            <span class="plant-name">Spinach</span>
+                            <span class="confidence">87% confidence</span>
+                            <span class="timestamp">5 min ago</span>
+                        </div>
+                        <div class="detection-actions">
+                            <button class="btn-small btn-primary">Water</button>
+                            <button class="btn-small btn-secondary">Navigate</button>
+                        </div>
+                    </div>
+                    <div class="detection-item">
+                        <div class="detection-icon">
+                            <i class="fas fa-apple-alt"></i>
+                        </div>
+                        <div class="detection-info">
+                            <span class="plant-name">Tomato Plant</span>
+                            <span class="confidence">91% confidence</span>
+                            <span class="timestamp">8 min ago</span>
+                        </div>
+                        <div class="detection-actions">
+                            <button class="btn-small btn-primary">Water</button>
+                            <button class="btn-small btn-secondary">Navigate</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Activity Log -->
+            <div class="data-panel">
+                <h3><i class="fas fa-clipboard-list"></i> Activity Log</h3>
+                <div class="log-container" id="logContainer">
+                    <div class="log-entry">
+                        <span class="log-time">14:32:15</span>
+                        <span class="log-action watered">Watered chili plant (150ml)</span>
+                    </div>
+                    <div class="log-entry">
+                        <span class="log-time">14:28:42</span>
+                        <span class="log-action detected">Detected new spinach plant</span>
+                    </div>
+                    <div class="log-entry">
+                        <span class="log-time">14:25:18</span>
+                        <span class="log-action moved">Moved to coordinates (2.3, 1.8)</span>
+                    </div>
+                    <div class="log-entry">
+                        <span class="log-time">14:22:05</span>
+                        <span class="log-action watered">Watered tomato plant (200ml)</span>
+                    </div>
+                    <div class="log-entry">
+                        <span class="log-time">14:18:33</span>
+                        <span class="log-action system">System started - Auto mode enabled</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistics -->
+            <div class="data-panel">
+                <h3><i class="fas fa-chart-bar"></i> Today's Statistics</h3>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-icon">
+                            <i class="fas fa-eye"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-value" id="plantsDetectedStat">47</span>
+                            <span class="stat-label">Plants Detected</span>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-icon">
+                            <i class="fas fa-tint"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-value" id="waterUsedStat">2.8L</span>
+                            <span class="stat-label">Water Used</span>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-icon">
+                            <i class="fas fa-route"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-value" id="distanceStat">156m</span>
+                            <span class="stat-label">Distance Traveled</span>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-value">3h 24m</span>
+                            <span class="stat-label">Active Time</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <p>&copy; 2024 SASI-Bot - Smart Agricultural Surveillance & Irrigation System</p>
+            <div class="footer-links">
+                <a href="#settings"><i class="fas fa-cog"></i> Settings</a>
+                <a href="#help"><i class="fas fa-question-circle"></i> Help</a>
+                <a href="#about"><i class="fas fa-info-circle"></i> About</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // SASI-Bot Dashboard JavaScript (Same functionality, enhanced with futuristic effects)
+        class SASIBotDashboard {
+            constructor() {
+                this.isConnected = false;
+                this.isRecording = false;
+                this.currentSpeed = 50;
+                this.currentPressure = 3;
+                this.waterAmount = 150;
+                this.selectedCrop = null;
+                this.autoMode = false;
+
+                this.init();
+            }
+
+            init() {
+                this.setupEventListeners();
+                this.startVideoStream();
+                this.updateSystemStatus();
+                this.startDataUpdates();
+                this.initializeEffects();
+            }
+
+            initializeEffects() {
+                // Add some futuristic startup effects
+                setTimeout(() => {
+                    this.logActivity('SYSTEM INITIALIZED - ALL SYSTEMS ONLINE', 'system');
+                }, 1000);
+
+                // Simulate connection establishment
+                setTimeout(() => {
+                    this.logActivity('ESP32-CAM CONNECTION ESTABLISHED', 'system');
+                }, 2000);
+
+                setTimeout(() => {
+                    this.logActivity('YOLO DETECTION MODEL LOADED', 'system');
+                }, 3000);
+            }
+
+            setupEventListeners() {
+                // Movement controls with enhanced feedback
+                document.querySelectorAll('.direction-btn').forEach(btn => {
+                    btn.addEventListener('mousedown', (e) => {
+                        this.handleMovement(e.target.dataset.direction, true);
+                        this.addButtonEffect(e.target);
+                    });
+                    btn.addEventListener('mouseup', () => this.handleMovement('stop', false));
+                    btn.addEventListener('mouseleave', () => this.handleMovement('stop', false));
+                });
+
+                // Speed control with glow effect
+                const speedSlider = document.getElementById('speedSlider');
+                speedSlider.addEventListener('input', (e) => {
+                    this.currentSpeed = e.target.value;
+                    const speedValue = document.getElementById('speedValue');
+                    speedValue.textContent = e.target.value;
+                    speedValue.style.textShadow = `0 0 ${e.target.value / 5}px var(--primary-cyan)`;
+                });
+
+                // Pressure control with glow effect
+                const pressureSlider = document.getElementById('pressureSlider');
+                pressureSlider.addEventListener('input', (e) => {
+                    this.currentPressure = e.target.value;
+                    const pressureValue = document.getElementById('pressureValue');
+                    pressureValue.textContent = e.target.value;
+                    pressureValue.style.textShadow = `0 0 ${e.target.value * 3}px var(--primary-cyan)`;
+                });
+
+                // Water amount
+                const waterAmountInput = document.getElementById('waterAmount');
+                waterAmountInput.addEventListener('change', (e) => {
+                    this.waterAmount = e.target.value;
+                });
+
+                // Crop presets with enhanced effects
+                document.querySelectorAll('.preset-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        this.selectCropPreset(e.currentTarget);
+                        this.addButtonEffect(e.currentTarget);
+                    });
+                });
+
+                // Control buttons
+                document.getElementById('autoModeBtn').addEventListener('click', (e) => {
+                    this.toggleAutoMode();
+                    this.addButtonEffect(e.target);
+                });
+                document.getElementById('emergencyStopBtn').addEventListener('click', (e) => {
+                    this.emergencyStop();
+                    this.addButtonEffect(e.target);
+                });
+                document.getElementById('waterBtn').addEventListener('click', (e) => {
+                    this.startWatering();
+                    this.addButtonEffect(e.target);
+                });
+                document.getElementById('stopWaterBtn').addEventListener('click', (e) => {
+                    this.stopWatering();
+                    this.addButtonEffect(e.target);
+                });
+
+                // Video controls
+                document.getElementById('recordBtn').addEventListener('click', (e) => {
+                    this.toggleRecording();
+                    this.addButtonEffect(e.target);
+                });
+                document.getElementById('screenshotBtn').addEventListener('click', (e) => {
+                    this.takeScreenshot();
+                    this.addButtonEffect(e.target);
+                });
+                document.getElementById('fullscreenBtn').addEventListener('click', (e) => {
+                    this.toggleFullscreen();
+                    this.addButtonEffect(e.target);
+                });
+
+                // Detection actions
+                document.querySelectorAll('.detection-actions .btn-primary').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        this.waterDetectedPlant(e.target.closest('.detection-item'));
+                        this.addButtonEffect(e.target);
+                    });
+                });
+
+                document.querySelectorAll('.detection-actions .btn-secondary').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        this.navigateToPlant(e.target.closest('.detection-item'));
+                        this.addButtonEffect(e.target);
+                    });
+                });
+            }
+
+            addButtonEffect(button) {
+                // Add a futuristic click effect
+                button.style.transform = 'scale(0.95)';
+                button.style.boxShadow = '0 0 30px rgba(0, 255, 255, 0.8)';
+                
+                setTimeout(() => {
+                    button.style.transform = '';
+                    button.style.boxShadow = '';
+                }, 150);
+            }
+
+            handleMovement(direction, isPressed) {
+                if (isPressed) {
+                    this.sendMovementCommand(direction, this.currentSpeed);
+                    this.logActivity(`MOVEMENT: ${direction.toUpperCase()} AT ${this.currentSpeed}% SPEED`, 'moved');
+                } else {
+                    this.sendMovementCommand('stop', 0);
+                }
+            }
+
+            sendMovementCommand(direction, speed) {
+                console.log(`Movement command: ${direction} at ${speed}% speed`);
+                
+                // Enhanced visual feedback for movement
+                if (direction !== 'stop') {
+                    this.showMovementIndicator(direction);
+                }
+                
+                // Simulate API call to Flask backend
+                // fetch('/api/movement', {
+                //     method: 'POST',
+                //     headers: { 'Content-Type': 'application/json' },
+                //     body: JSON.stringify({ direction: direction, speed: speed })
+                // });
+            }
+
+            showMovementIndicator(direction) {
+                // Create a visual indicator for movement direction
+                const indicator = document.createElement('div');
+                indicator.style.cssText = `
+                    position: fixed;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    background: linear-gradient(45deg, var(--primary-cyan), var(--neon-green));
+                    color: var(--darker-bg);
+                    padding: 1rem 2rem;
+                    border-radius: 20px;
+                    font-weight: bold;
+                    font-size: 1.2rem;
+                    z-index: 1000;
+                    box-shadow: 0 0 30px rgba(0, 255, 255, 0.6);
+                    pointer-events: none;
+                `;
+                indicator.textContent = `MOVING ${direction.toUpperCase()}`;
+                document.body.appendChild(indicator);
+
+                setTimeout(() => {
+                    indicator.remove();
+                }, 1000);
+            }
+
+            selectCropPreset(presetBtn) {
+                document.querySelectorAll('.preset-btn').forEach(btn => btn.classList.remove('active'));
+                presetBtn.classList.add('active');
+
+                const crop = presetBtn.dataset.crop;
+                this.selectedCrop = crop;
+
+                const presetAmounts = {
+                    chili: 150,
+                    spinach: 100,
+                    tomato: 200,
+                    custom: this.waterAmount
+                };
+
+                if (crop !== 'custom') {
+                    this.waterAmount = presetAmounts[crop];
+                    document.getElementById('waterAmount').value = this.waterAmount;
+                }
+
+                this.logActivity(`CROP PRESET SELECTED: ${crop.toUpperCase()}`, 'system');
+            }
+
+            toggleAutoMode() {
+                this.autoMode = !this.autoMode;
+                const btn = document.getElementById('autoModeBtn');
+
+                if (this.autoMode) {
+                    btn.innerHTML = '<i class="fas fa-magic"></i> AUTO MODE ACTIVE';
+                    btn.classList.add('btn-primary');
+                    btn.classList.remove('btn-secondary');
+                    this.logActivity('AUTONOMOUS MODE ACTIVATED', 'system');
+                    this.showSystemAlert('AUTO MODE ENABLED', 'success');
+                } else {
+                    btn.innerHTML = '<i class="fas fa-magic"></i> AUTO MODE';
+                    btn.classList.add('btn-secondary');
+                    btn.classList.remove('btn-primary');
+                    this.logActivity('MANUAL MODE ACTIVATED', 'system');
+                    this.showSystemAlert('MANUAL MODE ENABLED', 'info');
+                }
+            }
+
+            emergencyStop() {
+                this.sendMovementCommand('stop', 0);
+                this.stopWatering();
+                this.autoMode = false;
+
+                const autoBtn = document.getElementById('autoModeBtn');
+                autoBtn.innerHTML = '<i class="fas fa-magic"></i> AUTO MODE';
+                autoBtn.classList.add('btn-secondary');
+                autoBtn.classList.remove('btn-primary');
+
+                this.logActivity('⚠️ EMERGENCY STOP ACTIVATED ⚠️', 'system');
+                this.showSystemAlert('EMERGENCY STOP', 'danger');
+
+                // Enhanced visual feedback for emergency stop
+                document.body.style.background = 'linear-gradient(135deg, rgba(255, 7, 58, 0.1) 0%, var(--dark-bg) 100%)';
+                setTimeout(() => {
+                    document.body.style.background = '';
+                }, 3000);
+            }
+
+            showSystemAlert(message, type) {
+                const alert = document.createElement('div');
+                alert.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background: ${type === 'danger' ? 'linear-gradient(45deg, var(--danger-red), var(--hot-pink))' : 
+                                type === 'success' ? 'linear-gradient(45deg, var(--success-green), var(--neon-green))' :
+                                'linear-gradient(45deg, var(--primary-cyan), var(--electric-blue))'};
+                    color: ${type === 'success' ? 'var(--darker-bg)' : 'white'};
+                    padding: 1rem 2rem;
+                    border-radius: 15px;
+                    font-weight: bold;
+                    font-size: 1.1rem;
+                    z-index: 1000;
+                    box-shadow: 0 0 30px ${type === 'danger' ? 'rgba(255, 7, 58, 0.6)' : 
+                                          type === 'success' ? 'rgba(0, 255, 65, 0.6)' :
+                                          'rgba(0, 255, 255, 0.6)'};
+                    border: 2px solid ${type === 'danger' ? 'var(--danger-red)' : 
+                                      type === 'success' ? 'var(--success-green)' :
+                                      'var(--primary-cyan)'};
+                    backdrop-filter: blur(10px);
+                    animation: slideInRight 0.5s ease-out;
+                `;
+                alert.textContent = message;
+                document.body.appendChild(alert);
+
+                setTimeout(() => {
+                    alert.style.animation = 'slideOutRight 0.5s ease-in';
+                    setTimeout(() => alert.remove(), 500);
+                }, 3000);
+            }
+
+            startWatering() {
+                if (!this.selectedCrop) {
+                    this.showSystemAlert('SELECT CROP PRESET FIRST', 'danger');
+                    return;
+                }
+
+                const waterBtn = document.getElementById('waterBtn');
+                waterBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> WATERING...';
+                waterBtn.disabled = true;
+
+                this.logActivity(`WATERING INITIATED: ${this.selectedCrop.toUpperCase()} (${this.waterAmount}ml)`, 'watered');
+                this.showSystemAlert(`WATERING ${this.selectedCrop.toUpperCase()}`, 'success');
+
+                // Enhanced watering animation
+                this.animateWaterFlow();
+
+                // Simulate watering duration
+                setTimeout(() => {
+                    this.stopWatering();
+                }, 3000);
+            }
+
+            animateWaterFlow() {
+                const statusFill = document.querySelector('.status-fill');
+                statusFill.style.animation = 'flow 0.5s ease-in-out infinite alternate';
+            }
+
+            stopWatering() {
+                const waterBtn = document.getElementById('waterBtn');
+                waterBtn.innerHTML = '<i class="fas fa-play"></i> START WATERING';
+                waterBtn.disabled = false;
+
+                this.logActivity('WATERING SEQUENCE COMPLETED', 'system');
+            }
+
+            toggleRecording() {
+                this.isRecording = !this.isRecording;
+                const recordBtn = document.getElementById('recordBtn');
+
+                if (this.isRecording) {
+                    recordBtn.innerHTML = '<i class="fas fa-stop"></i>';
+                    recordBtn.style.background = 'rgba(255, 7, 58, 0.8)';
+                    recordBtn.style.boxShadow = '0 0 20px rgba(255, 7, 58, 0.6)';
+                    this.logActivity('VIDEO RECORDING STARTED', 'system');
+                    this.showSystemAlert('RECORDING ACTIVE', 'danger');
+                } else {
+                    recordBtn.innerHTML = '<i class="fas fa-record-vinyl"></i>';
+                    recordBtn.style.background = 'var(--glass-bg)';
+                    recordBtn.style.boxShadow = '';
+                    this.logActivity('VIDEO RECORDING STOPPED', 'system');
+                    this.showSystemAlert('RECORDING STOPPED', 'info');
+                }
+            }
+
+            takeScreenshot() {
+                this.logActivity('SCREENSHOT CAPTURED', 'system');
+                this.showSystemAlert('SCREENSHOT SAVED', 'success');
+
+                const videoFeed = document.querySelector('.video-feed');
+                videoFeed.style.filter = 'brightness(1.5) contrast(1.2)';
+                videoFeed.style.boxShadow = '0 0 30px rgba(0, 255, 255, 0.8)';
+                setTimeout(() => {
+                    videoFeed.style.filter = 'contrast(1.1) brightness(1.1)';
+                    videoFeed.style.boxShadow = '';
+                }, 300);
+            }
+
+            toggleFullscreen() {
+                const videoContainer = document.querySelector('.video-container');
+
+                if (!document.fullscreenElement) {
+                    videoContainer.requestFullscreen().catch(err => {
+                        console.log('Fullscreen not supported');
+                    });
+                    this.logActivity('FULLSCREEN MODE ACTIVATED', 'system');
+                } else {
+                    document.exitFullscreen();
+                    this.logActivity('FULLSCREEN MODE DEACTIVATED', 'system');
+                }
+            }
+
+            waterDetectedPlant(detectionItem) {
+                const plantName = detectionItem.querySelector('.plant-name').textContent;
+                this.logActivity(`AUTO-WATERING: ${plantName.toUpperCase()}`, 'watered');
+
+                const icon = detectionItem.querySelector('.detection-icon');
+                icon.style.background = 'linear-gradient(135deg, var(--electric-blue) 0%, var(--primary-cyan) 100%)';
+                icon.style.boxShadow = '0 0 25px rgba(0, 128, 255, 0.6)';
+                setTimeout(() => {
+                    icon.style.background = 'linear-gradient(135deg, var(--neon-green) 0%, var(--primary-cyan) 100%)';
+                    icon.style.boxShadow = '0 0 20px rgba(57, 255, 20, 0.4)';
+                }, 2000);
+            }
+
+            navigateToPlant(detectionItem) {
+                const plantName = detectionItem.querySelector('.plant-name').textContent;
+                this.logActivity(`NAVIGATION TARGET: ${plantName.toUpperCase()}`, 'moved');
+
+                detectionItem.style.background = 'rgba(255, 140, 0, 0.1)';
+                detectionItem.style.borderColor = 'var(--warning-orange)';
+                detectionItem.style.boxShadow = '0 0 20px rgba(255, 140, 0, 0.3)';
+                setTimeout(() => {
+                    detectionItem.style.background = 'var(--glass-bg)';
+                    detectionItem.style.borderColor = 'var(--border-glow)';
+                    detectionItem.style.boxShadow = '';
+                }, 2000);
+            }
+
+            startVideoStream() {
+                // In real implementation, this would connect to ESP32-CAM stream
+                let frameCount = 0;
+                setInterval(() => {
+                    frameCount++;
+                    // videoImg.src = `http://your-esp32-cam-ip/stream?frame=${frameCount}`;
+                }, 66); // ~15 FPS
+            }
+
+            updateSystemStatus() {
+                setInterval(() => {
+                    // Update battery level with glow effect
+                    const batterySpan = document.getElementById('batteryLevel');
+                    const currentBattery = parseInt(batterySpan.textContent);
+                    if (currentBattery > 20) {
+                        const newBattery = Math.max(20, currentBattery - Math.random() * 2).toFixed(0);
+                        batterySpan.textContent = `${newBattery}%`;
+                        
+                        // Change glow based on battery level
+                        if (newBattery < 30) {
+                            batterySpan.parentElement.querySelector('i').className = 'fas fa-battery-quarter status-warning';
+                        } else if (newBattery < 60) {
+                            batterySpan.parentElement.querySelector('i').className = 'fas fa-battery-half status-good';
+                        }
+                    }
+
+                    // Update temperature with dynamic glow
+                    const tempSpan = document.getElementById('temperature');
+                    const baseTemp = 24;
+                    const newTemp = baseTemp + (Math.random() - 0.5) * 4;
+                    tempSpan.textContent = `${newTemp.toFixed(1)}°C`;
+
+                    // Update detected plants count
+                    const detectedCount = document.getElementById('detectedCount');
+                    detectedCount.textContent = Math.floor(Math.random() * 5) + 1;
+                }, 5000);
+            }
+
+            startDataUpdates() {
+                setInterval(() => {
+                    this.updateStatistics();
+                }, 10000);
+            }
+
+            updateStatistics() {
+                // Update plants detected with glow effect
+                const plantsDetected = document.getElementById('plantsDetectedStat');
+                const current = parseInt(plantsDetected.textContent);
+                const newValue = current + Math.floor(Math.random() * 3);
+                plantsDetected.textContent = newValue;
+                plantsDetected.style.textShadow = `0 0 ${Math.min(newValue / 2, 20)}px var(--primary-cyan)`;
+
+                // Update water used
+                const waterUsed = document.getElementById('waterUsedStat');
+                const currentWater = parseFloat(waterUsed.textContent);
+                waterUsed.textContent = `${(currentWater + Math.random() * 0.1).toFixed(1)}L`;
+
+                // Update distance
+                const distance = document.getElementById('distanceStat');
+                const currentDistance = parseInt(distance.textContent);
+                distance.textContent = `${currentDistance + Math.floor(Math.random() * 5)}m`;
+            }
+
+            logActivity(message, type = 'system') {
+                const logContainer = document.getElementById('logContainer');
+                const timestamp = new Date().toLocaleTimeString();
+
+                const logEntry = document.createElement('div');
+                logEntry.className = 'log-entry';
+                logEntry.innerHTML = `
+                    <span class="log-time">${timestamp}</span>
+                    <span class="log-action ${type}">${message}</span>
+                `;
+
+                logContainer.insertBefore(logEntry, logContainer.firstChild);
+
+                // Keep only last 10 entries
+                while (logContainer.children.length > 10) {
+                    logContainer.removeChild(logContainer.lastChild);
+                }
+
+                // Add entrance animation
+                logEntry.style.opacity = '0';
+                logEntry.style.transform = 'translateX(-20px)';
+                setTimeout(() => {
+                    logEntry.style.transition = 'all 0.3s ease';
+                    logEntry.style.opacity = '1';
+                    logEntry.style.transform = 'translateX(0)';
+                }, 10);
+            }
+        }
+
+        // Add CSS animations for alerts
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideInRight {
+                from {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+            
+            @keyframes slideOutRight {
+                from {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+                to {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Initialize dashboard when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new SASIBotDashboard();
+        });
+
+        // Enhanced keyboard shortcuts with visual feedback
+        document.addEventListener('keydown', (e) => {
+            if (e.target.tagName === 'INPUT') return;
+
+            let button;
+            switch (e.key.toLowerCase()) {
+                case 'w':
+                case 'arrowup':
+                    button = document.querySelector('[data-direction="forward"]');
+                    break;
+                case 's':
+                case 'arrowdown':
+                    button = document.querySelector('[data-direction="backward"]');
+                    break;
+                case 'a':
+                case 'arrowleft':
+                    button = document.querySelector('[data-direction="left"]');
+                    break;
+                case 'd':
+                case 'arrowright':
+                    button = document.querySelector('[data-direction="right"]');
+                    break;
+                case ' ':
+                    e.preventDefault();
+                    button = document.querySelector('[data-direction="stop"]');
+                    break;
+                case 'r':
+                    button = document.getElementById('recordBtn');
+                    break;
+                case 'f':
+                    button = document.getElementById('fullscreenBtn');
+                    break;
+            }
+
+            if (button) {
+                button.click();
+                // Add visual feedback for keyboard input
+                button.style.transform = 'scale(0.95)';
+                button.style.boxShadow = '0 0 25px rgba(0, 255, 255, 0.8)';
+                setTimeout(() => {
+                    button.style.transform = '';
+                    button.style.boxShadow = '';
+                }, 150);
+            }
+        });
+
+        // Handle keyboard key release for movement
+        document.addEventListener('keyup', (e) => {
+            if (e.target.tagName === 'INPUT') return;
+
+            if (['w', 's', 'a', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(e.key.toLowerCase())) {
+                document.querySelector('[data-direction="stop"]').click();
+            }
+        });
+    </script>
+</body>
+</html>

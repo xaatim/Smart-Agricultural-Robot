@@ -1,0 +1,1415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SASI-Bot Dashboard - Smart Agricultural Surveillance</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-green: #2d5a3d;
+            --secondary-green: #4a7c59;
+            --accent-green: #66bb6a;
+            --light-green: #a5d6a7;
+            --dark-green: #1b3a2e;
+            --earth-brown: #8d6e63;
+            --light-brown: #bcaaa4;
+            --warning-orange: #ff9800;
+            --danger-red: #f44336;
+            --success-green: #4caf50;
+            --info-blue: #2196f3;
+            --background: #f5f7fa;
+            --surface: #ffffff;
+            --text-primary: #2c3e50;
+            --text-secondary: #546e7a;
+            --border: #e0e0e0;
+            --shadow: rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--background) 0%, #e8f5e8 100%);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--primary-green) 0%, var(--secondary-green) 100%);
+            color: white;
+            padding: 1rem 0;
+            box-shadow: 0 2px 10px var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo i {
+            font-size: 2rem;
+            color: var(--accent-green);
+        }
+
+        .logo h1 {
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+
+        .system-status {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .status-online {
+            color: var(--success-green);
+            animation: pulse 2s infinite;
+        }
+        .status-good {
+            color: var(--accent-green);
+        }
+        .status-warning {
+            color: var(--warning-orange);
+        }
+        .status-error {
+            color: var(--danger-red);
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        /* Dashboard Layout */
+        .dashboard {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            grid-template-rows: auto auto;
+            gap: 2rem;
+            grid-template-areas:
+                "video controls"
+                "data data";
+        }
+
+        .video-section {
+            grid-area: video;
+        }
+
+        .control-section {
+            grid-area: controls;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .data-section {
+            grid-area: data;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 1.5rem;
+        }
+
+        /* Video Section */
+        .video-container {
+            background: var(--surface);
+            border-radius: 12px;
+            box-shadow: 0 4px 20px var(--shadow);
+            overflow: hidden;
+        }
+
+        .video-header {
+            background: var(--primary-green);
+            color: white;
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .video-header h2 {
+            font-size: 1.2rem;
+            font-weight: 500;
+        }
+
+        .video-controls {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-icon {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 0.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-icon:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .video-feed {
+            position: relative;
+            background: #000;
+            aspect-ratio: 4 / 3;
+        }
+
+        .video-feed img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .detection-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+        }
+
+        .detection-box {
+            position: absolute;
+            border: 2px solid var(--accent-green);
+            background: rgba(102, 187, 106, 0.1);
+            border-radius: 4px;
+        }
+
+        .detection-label {
+            position: absolute;
+            top: -25px;
+            left: 0;
+            background: var(--accent-green);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .video-info {
+            padding: 1rem 1.5rem;
+            background: #f8f9fa;
+            display: flex;
+            justify-content: space-between;
+            border-top: 1px solid var(--border);
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .info-item .label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .info-item .value {
+            font-weight: 600;
+            color: var(--primary-green);
+        }
+
+        /* Control Panels */
+        .control-panel,
+        .data-panel {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 20px var(--shadow);
+        }
+
+        .control-panel h3,
+        .data-panel h3 {
+            color: var(--primary-green);
+            margin-bottom: 1.5rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Joystick Control */
+        .joystick-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .joystick {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 0.5rem;
+            width: 150px;
+            height: 150px;
+        }
+
+        .direction-btn {
+            background: linear-gradient(135deg, var(--light-green) 0%, var(--accent-green) 100%);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .direction-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 187, 106, 0.3);
+        }
+
+        .direction-btn:active {
+            transform: translateY(0);
+            background: var(--secondary-green);
+        }
+
+        .direction-btn.up { grid-column: 2; grid-row: 1; }
+        .direction-btn.left { grid-column: 1; grid-row: 2; }
+        .direction-btn.center { 
+            grid-column: 2; 
+            grid-row: 2; 
+            background: linear-gradient(135deg, var(--danger-red) 0%, #e53935 100%);
+        }
+        .direction-btn.right { grid-column: 3; grid-row: 2; }
+        .direction-btn.down { grid-column: 2; grid-row: 3; }
+
+        /* Speed Control */
+        .speed-control {
+            margin-bottom: 1.5rem;
+        }
+
+        .speed-control label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .slider {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: var(--border);
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--accent-green);
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(102, 187, 106, 0.3);
+        }
+
+        .slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--accent-green);
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 6px rgba(102, 187, 106, 0.3);
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-green) 0%, var(--success-green) 100%);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, var(--text-secondary) 0%, #455a64 100%);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--danger-red) 0%, #e53935 100%);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-small {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.8rem;
+        }
+
+        .control-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        /* Watering Presets */
+        .watering-presets {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .preset-btn {
+            background: var(--surface);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .preset-btn:hover {
+            border-color: var(--accent-green);
+            background: rgba(102, 187, 106, 0.05);
+        }
+
+        .preset-btn.active {
+            border-color: var(--accent-green);
+            background: rgba(102, 187, 106, 0.1);
+        }
+
+        .preset-btn i {
+            font-size: 1.5rem;
+            color: var(--secondary-green);
+        }
+
+        .preset-btn span {
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .preset-btn small {
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+        }
+
+        /* Water Controls */
+        .water-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 0.5rem;
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--accent-green);
+        }
+
+        .water-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .water-status {
+            text-align: center;
+        }
+
+        .status-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--border);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 0.5rem;
+        }
+
+        .status-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-green) 0%, var(--success-green) 100%);
+            transition: width 0.3s ease;
+        }
+
+        /* Detection List */
+        .detection-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .detection-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .detection-item:hover {
+            background: rgba(102, 187, 106, 0.05);
+            border-color: var(--accent-green);
+        }
+
+        .detection-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--light-green) 0%, var(--accent-green) 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .detection-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .plant-name {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .confidence {
+            font-size: 0.9rem;
+            color: var(--success-green);
+            font-weight: 500;
+        }
+
+        .timestamp {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .detection-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        /* Activity Log */
+        .log-container {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .log-entry {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.75rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .log-entry:last-child {
+            border-bottom: none;
+        }
+
+        .log-time {
+            font-family: "Courier New", monospace;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            min-width: 80px;
+        }
+
+        .log-action {
+            flex: 1;
+            font-size: 0.9rem;
+        }
+
+        .log-action.watered { color: var(--info-blue); }
+        .log-action.detected { color: var(--success-green); }
+        .log-action.moved { color: var(--warning-orange); }
+        .log-action.system { color: var(--text-secondary); }
+
+        /* Statistics */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: rgba(102, 187, 106, 0.05);
+            border-radius: 8px;
+            border: 1px solid rgba(102, 187, 106, 0.2);
+        }
+
+        .stat-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--accent-green) 0%, var(--success-green) 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .stat-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-green);
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        /* Footer */
+        .footer {
+            background: var(--primary-green);
+            color: white;
+            padding: 2rem 0;
+            margin-top: 3rem;
+        }
+
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .footer-links a {
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: color 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--accent-green);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+                grid-template-areas:
+                    "video"
+                    "controls"
+                    "data";
+            }
+
+            .control-section {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                gap: 1.5rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .system-status {
+                justify-content: center;
+            }
+
+            .dashboard {
+                padding: 0 1rem;
+                gap: 1rem;
+            }
+
+            .data-section {
+                grid-template-columns: 1fr;
+            }
+
+            .watering-presets {
+                grid-template-columns: 1fr;
+            }
+
+            .water-controls {
+                grid-template-columns: 1fr;
+            }
+
+            .control-buttons,
+            .water-buttons {
+                flex-direction: column;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .footer-content {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+        }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--border);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--accent-green);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--secondary-green);
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <i class="fas fa-robot"></i>
+                <h1>SASI-Bot Control Center</h1>
+            </div>
+            <div class="system-status">
+                <div class="status-item">
+                    <i class="fas fa-wifi status-online"></i>
+                    <span>Connected</span>
+                </div>
+                <div class="status-item">
+                    <i class="fas fa-battery-three-quarters status-good"></i>
+                    <span id="batteryLevel">78%</span>
+                </div>
+                <div class="status-item">
+                    <i class="fas fa-thermometer-half"></i>
+                    <span id="temperature">24°C</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Dashboard -->
+    <main class="dashboard">
+        <!-- Video Feed Section -->
+        <section class="video-section">
+            <div class="video-container">
+                <div class="video-header">
+                    <h2><i class="fas fa-video"></i> Live Camera Feed</h2>
+                    <div class="video-controls">
+                        <button class="btn-icon" id="recordBtn">
+                            <i class="fas fa-record-vinyl"></i>
+                        </button>
+                        <button class="btn-icon" id="screenshotBtn">
+                            <i class="fas fa-camera"></i>
+                        </button>
+                        <button class="btn-icon" id="fullscreenBtn">
+                            <i class="fas fa-expand"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="video-feed">
+                    <img id="videoStream" src="/placeholder.svg?height=480&width=640" alt="Live Camera Feed">
+                    <div class="detection-overlay">
+                        <div class="detection-box" style="top: 30%; left: 20%; width: 25%; height: 20%;">
+                            <span class="detection-label">Chili Plant - 94%</span>
+                        </div>
+                        <div class="detection-box" style="top: 50%; left: 60%; width: 20%; height: 15%;">
+                            <span class="detection-label">Spinach - 87%</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="video-info">
+                    <div class="info-item">
+                        <span class="label">Resolution:</span>
+                        <span class="value">640x480</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">FPS:</span>
+                        <span class="value">15</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Detected Plants:</span>
+                        <span class="value" id="detectedCount">2</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Control Panels -->
+        <section class="control-section">
+            <!-- Movement Control -->
+            <div class="control-panel">
+                <h3><i class="fas fa-gamepad"></i> Movement Control</h3>
+                <div class="joystick-container">
+                    <div class="joystick">
+                        <button class="direction-btn up" data-direction="forward">
+                            <i class="fas fa-chevron-up"></i>
+                        </button>
+                        <button class="direction-btn left" data-direction="left">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <button class="direction-btn center" data-direction="stop">
+                            <i class="fas fa-stop"></i>
+                        </button>
+                        <button class="direction-btn right" data-direction="right">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                        <button class="direction-btn down" data-direction="backward">
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="speed-control">
+                    <label for="speedSlider">Speed: <span id="speedValue">50</span>%</label>
+                    <input type="range" id="speedSlider" min="10" max="100" value="50" class="slider">
+                </div>
+                <div class="control-buttons">
+                    <button class="btn btn-secondary" id="autoModeBtn">
+                        <i class="fas fa-magic"></i> Auto Mode
+                    </button>
+                    <button class="btn btn-danger" id="emergencyStopBtn">
+                        <i class="fas fa-hand-paper"></i> Emergency Stop
+                    </button>
+                </div>
+            </div>
+
+            <!-- Watering Control -->
+            <div class="control-panel">
+                <h3><i class="fas fa-tint"></i> Watering System</h3>
+                <div class="watering-presets">
+                    <button class="preset-btn" data-crop="chili">
+                        <i class="fas fa-pepper-hot"></i>
+                        <span>Chili</span>
+                        <small>150ml</small>
+                    </button>
+                    <button class="preset-btn" data-crop="spinach">
+                        <i class="fas fa-leaf"></i>
+                        <span>Spinach</span>
+                        <small>100ml</small>
+                    </button>
+                    <button class="preset-btn" data-crop="tomato">
+                        <i class="fas fa-apple-alt"></i>
+                        <span>Tomato</span>
+                        <small>200ml</small>
+                    </button>
+                    <button class="preset-btn" data-crop="custom">
+                        <i class="fas fa-cog"></i>
+                        <span>Custom</span>
+                        <small>Manual</small>
+                    </button>
+                </div>
+                <div class="water-controls">
+                    <div class="water-amount">
+                        <label for="waterAmount">Amount (ml):</label>
+                        <input type="number" id="waterAmount" min="10" max="500" value="150" class="input-field">
+                    </div>
+                    <div class="pressure-control">
+                        <label for="pressureSlider">Pressure: <span id="pressureValue">3</span></label>
+                        <input type="range" id="pressureSlider" min="1" max="5" value="3" class="slider">
+                    </div>
+                </div>
+                <div class="water-buttons">
+                    <button class="btn btn-primary" id="waterBtn">
+                        <i class="fas fa-play"></i> Start Watering
+                    </button>
+                    <button class="btn btn-secondary" id="stopWaterBtn">
+                        <i class="fas fa-stop"></i> Stop
+                    </button>
+                </div>
+                <div class="water-status">
+                    <div class="status-bar">
+                        <div class="status-fill" style="width: 65%"></div>
+                    </div>
+                    <span>Water Tank: 65% (3.2L remaining)</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Data Panels -->
+        <section class="data-section">
+            <!-- Detection History -->
+            <div class="data-panel">
+                <h3><i class="fas fa-search"></i> Plant Detection History</h3>
+                <div class="detection-list">
+                    <div class="detection-item">
+                        <div class="detection-icon">
+                            <i class="fas fa-pepper-hot"></i>
+                        </div>
+                        <div class="detection-info">
+                            <span class="plant-name">Chili Plant</span>
+                            <span class="confidence">94% confidence</span>
+                            <span class="timestamp">2 min ago</span>
+                        </div>
+                        <div class="detection-actions">
+                            <button class="btn-small btn-primary">Water</button>
+                            <button class="btn-small btn-secondary">Navigate</button>
+                        </div>
+                    </div>
+                    <div class="detection-item">
+                        <div class="detection-icon">
+                            <i class="fas fa-leaf"></i>
+                        </div>
+                        <div class="detection-info">
+                            <span class="plant-name">Spinach</span>
+                            <span class="confidence">87% confidence</span>
+                            <span class="timestamp">5 min ago</span>
+                        </div>
+                        <div class="detection-actions">
+                            <button class="btn-small btn-primary">Water</button>
+                            <button class="btn-small btn-secondary">Navigate</button>
+                        </div>
+                    </div>
+                    <div class="detection-item">
+                        <div class="detection-icon">
+                            <i class="fas fa-apple-alt"></i>
+                        </div>
+                        <div class="detection-info">
+                            <span class="plant-name">Tomato Plant</span>
+                            <span class="confidence">91% confidence</span>
+                            <span class="timestamp">8 min ago</span>
+                        </div>
+                        <div class="detection-actions">
+                            <button class="btn-small btn-primary">Water</button>
+                            <button class="btn-small btn-secondary">Navigate</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Activity Log -->
+            <div class="data-panel">
+                <h3><i class="fas fa-clipboard-list"></i> Activity Log</h3>
+                <div class="log-container" id="logContainer">
+                    <div class="log-entry">
+                        <span class="log-time">14:32:15</span>
+                        <span class="log-action watered">Watered chili plant (150ml)</span>
+                    </div>
+                    <div class="log-entry">
+                        <span class="log-time">14:28:42</span>
+                        <span class="log-action detected">Detected new spinach plant</span>
+                    </div>
+                    <div class="log-entry">
+                        <span class="log-time">14:25:18</span>
+                        <span class="log-action moved">Moved to coordinates (2.3, 1.8)</span>
+                    </div>
+                    <div class="log-entry">
+                        <span class="log-time">14:22:05</span>
+                        <span class="log-action watered">Watered tomato plant (200ml)</span>
+                    </div>
+                    <div class="log-entry">
+                        <span class="log-time">14:18:33</span>
+                        <span class="log-action system">System started - Auto mode enabled</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistics -->
+            <div class="data-panel">
+                <h3><i class="fas fa-chart-bar"></i> Today's Statistics</h3>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-icon">
+                            <i class="fas fa-eye"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-value" id="plantsDetectedStat">47</span>
+                            <span class="stat-label">Plants Detected</span>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-icon">
+                            <i class="fas fa-tint"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-value" id="waterUsedStat">2.8L</span>
+                            <span class="stat-label">Water Used</span>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-icon">
+                            <i class="fas fa-route"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-value" id="distanceStat">156m</span>
+                            <span class="stat-label">Distance Traveled</span>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-value">3h 24m</span>
+                            <span class="stat-label">Active Time</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <p>&copy; 2024 SASI-Bot - Smart Agricultural Surveillance & Irrigation System</p>
+            <div class="footer-links">
+                <a href="#settings"><i class="fas fa-cog"></i> Settings</a>
+                <a href="#help"><i class="fas fa-question-circle"></i> Help</a>
+                <a href="#about"><i class="fas fa-info-circle"></i> About</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // SASI-Bot Dashboard JavaScript
+        class SASIBotDashboard {
+            constructor() {
+                this.isConnected = false;
+                this.isRecording = false;
+                this.currentSpeed = 50;
+                this.currentPressure = 3;
+                this.waterAmount = 150;
+                this.selectedCrop = null;
+                this.autoMode = false;
+
+                this.init();
+            }
+
+            init() {
+                this.setupEventListeners();
+                this.startVideoStream();
+                this.updateSystemStatus();
+                this.startDataUpdates();
+            }
+
+            setupEventListeners() {
+                // Movement controls
+                document.querySelectorAll('.direction-btn').forEach(btn => {
+                    btn.addEventListener('mousedown', (e) => this.handleMovement(e.target.dataset.direction, true));
+                    btn.addEventListener('mouseup', () => this.handleMovement('stop', false));
+                    btn.addEventListener('mouseleave', () => this.handleMovement('stop', false));
+                });
+
+                // Speed control
+                const speedSlider = document.getElementById('speedSlider');
+                speedSlider.addEventListener('input', (e) => {
+                    this.currentSpeed = e.target.value;
+                    document.getElementById('speedValue').textContent = e.target.value;
+                });
+
+                // Pressure control
+                const pressureSlider = document.getElementById('pressureSlider');
+                pressureSlider.addEventListener('input', (e) => {
+                    this.currentPressure = e.target.value;
+                    document.getElementById('pressureValue').textContent = e.target.value;
+                });
+
+                // Water amount
+                const waterAmountInput = document.getElementById('waterAmount');
+                waterAmountInput.addEventListener('change', (e) => {
+                    this.waterAmount = e.target.value;
+                });
+
+                // Crop presets
+                document.querySelectorAll('.preset-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => this.selectCropPreset(e.currentTarget));
+                });
+
+                // Control buttons
+                document.getElementById('autoModeBtn').addEventListener('click', () => this.toggleAutoMode());
+                document.getElementById('emergencyStopBtn').addEventListener('click', () => this.emergencyStop());
+                document.getElementById('waterBtn').addEventListener('click', () => this.startWatering());
+                document.getElementById('stopWaterBtn').addEventListener('click', () => this.stopWatering());
+
+                // Video controls
+                document.getElementById('recordBtn').addEventListener('click', () => this.toggleRecording());
+                document.getElementById('screenshotBtn').addEventListener('click', () => this.takeScreenshot());
+                document.getElementById('fullscreenBtn').addEventListener('click', () => this.toggleFullscreen());
+
+                // Detection actions
+                document.querySelectorAll('.detection-actions .btn-primary').forEach(btn => {
+                    btn.addEventListener('click', (e) => this.waterDetectedPlant(e.target.closest('.detection-item')));
+                });
+
+                document.querySelectorAll('.detection-actions .btn-secondary').forEach(btn => {
+                    btn.addEventListener('click', (e) => this.navigateToPlant(e.target.closest('.detection-item')));
+                });
+            }
+
+            handleMovement(direction, isPressed) {
+                if (isPressed) {
+                    this.sendMovementCommand(direction, this.currentSpeed);
+                    this.logActivity(`Moving ${direction} at ${this.currentSpeed}% speed`);
+                } else {
+                    this.sendMovementCommand('stop', 0);
+                }
+            }
+
+            sendMovementCommand(direction, speed) {
+                console.log(`Movement command: ${direction} at ${speed}% speed`);
+                
+                // Simulate API call to Flask backend
+                // fetch('/api/movement', {
+                //     method: 'POST',
+                //     headers: { 'Content-Type': 'application/json' },
+                //     body: JSON.stringify({ direction: direction, speed: speed })
+                // });
+            }
+
+            selectCropPreset(presetBtn) {
+                document.querySelectorAll('.preset-btn').forEach(btn => btn.classList.remove('active'));
+                presetBtn.classList.add('active');
+
+                const crop = presetBtn.dataset.crop;
+                this.selectedCrop = crop;
+
+                const presetAmounts = {
+                    chili: 150,
+                    spinach: 100,
+                    tomato: 200,
+                    custom: this.waterAmount
+                };
+
+                if (crop !== 'custom') {
+                    this.waterAmount = presetAmounts[crop];
+                    document.getElementById('waterAmount').value = this.waterAmount;
+                }
+
+                this.logActivity(`Selected ${crop} watering preset`);
+            }
+
+            toggleAutoMode() {
+                this.autoMode = !this.autoMode;
+                const btn = document.getElementById('autoModeBtn');
+
+                if (this.autoMode) {
+                    btn.innerHTML = '<i class="fas fa-magic"></i> Auto Mode ON';
+                    btn.classList.add('btn-primary');
+                    btn.classList.remove('btn-secondary');
+                    this.logActivity('Auto mode enabled');
+                } else {
+                    btn.innerHTML = '<i class="fas fa-magic"></i> Auto Mode';
+                    btn.classList.add('btn-secondary');
+                    btn.classList.remove('btn-primary');
+                    this.logActivity('Auto mode disabled');
+                }
+            }
+
+            emergencyStop() {
+                this.sendMovementCommand('stop', 0);
+                this.stopWatering();
+                this.autoMode = false;
+
+                const autoBtn = document.getElementById('autoModeBtn');
+                autoBtn.innerHTML = '<i class="fas fa-magic"></i> Auto Mode';
+                autoBtn.classList.add('btn-secondary');
+                autoBtn.classList.remove('btn-primary');
+
+                this.logActivity('EMERGENCY STOP activated', 'system');
+
+                // Visual feedback
+                document.body.style.background = 'linear-gradient(135deg, #ffebee 0%, #f5f7fa 100%)';
+                setTimeout(() => {
+                    document.body.style.background = 'linear-gradient(135deg, #f5f7fa 0%, #e8f5e8 100%)';
+                }, 2000);
+            }
+
+            startWatering() {
+                if (!this.selectedCrop) {
+                    alert('Please select a crop preset first');
+                    return;
+                }
+
+                const waterBtn = document.getElementById('waterBtn');
+                waterBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Watering...';
+                waterBtn.disabled = true;
+
+                this.logActivity(`Started watering ${this.selectedCrop} (${this.waterAmount}ml)`, 'watered');
+
+                // Simulate watering duration
+                setTimeout(() => {
+                    this.stopWatering();
+                }, 3000);
+            }
+
+            stopWatering() {
+                const waterBtn = document.getElementById('waterBtn');
+                waterBtn.innerHTML = '<i class="fas fa-play"></i> Start Watering';
+                waterBtn.disabled = false;
+
+                this.logActivity('Watering stopped', 'system');
+            }
+
+            toggleRecording() {
+                this.isRecording = !this.isRecording;
+                const recordBtn = document.getElementById('recordBtn');
+
+                if (this.isRecording) {
+                    recordBtn.innerHTML = '<i class="fas fa-stop"></i>';
+                    recordBtn.style.background = 'rgba(244, 67, 54, 0.8)';
+                    this.logActivity('Video recording started', 'system');
+                } else {
+                    recordBtn.innerHTML = '<i class="fas fa-record-vinyl"></i>';
+                    recordBtn.style.background = 'rgba(255, 255, 255, 0.2)';
+                    this.logActivity('Video recording stopped', 'system');
+                }
+            }
+
+            takeScreenshot() {
+                this.logActivity('Screenshot captured', 'system');
+
+                const videoFeed = document.querySelector('.video-feed');
+                videoFeed.style.filter = 'brightness(1.5)';
+                setTimeout(() => {
+                    videoFeed.style.filter = 'none';
+                }, 200);
+            }
+
+            toggleFullscreen() {
+                const videoContainer = document.querySelector('.video-container');
+
+                if (!document.fullscreenElement) {
+                    videoContainer.requestFullscreen().catch(err => {
+                        console.log('Fullscreen not supported');
+                    });
+                } else {
+                    document.exitFullscreen();
+                }
+            }
+
+            waterDetectedPlant(detectionItem) {
+                const plantName = detectionItem.querySelector('.plant-name').textContent;
+                this.logActivity(`Watering detected ${plantName}`, 'watered');
+
+                const icon = detectionItem.querySelector('.detection-icon');
+                icon.style.background = 'linear-gradient(135deg, #2196f3 0%, #03a9f4 100%)';
+                setTimeout(() => {
+                    icon.style.background = 'linear-gradient(135deg, var(--light-green) 0%, var(--accent-green) 100%)';
+                }, 2000);
+            }
+
+            navigateToPlant(detectionItem) {
+                const plantName = detectionItem.querySelector('.plant-name').textContent;
+                this.logActivity(`Navigating to ${plantName}`, 'moved');
+
+                detectionItem.style.background = 'rgba(255, 152, 0, 0.1)';
+                setTimeout(() => {
+                    detectionItem.style.background = 'transparent';
+                }, 2000);
+            }
+
+            startVideoStream() {
+                // In real implementation, this would connect to ESP32-CAM stream
+                let frameCount = 0;
+                setInterval(() => {
+                    frameCount++;
+                    // videoImg.src = `http://your-esp32-cam-ip/stream?frame=${frameCount}`;
+                }, 66); // ~15 FPS
+            }
+
+            updateSystemStatus() {
+                setInterval(() => {
+                    // Update battery level
+                    const batterySpan = document.getElementById('batteryLevel');
+                    const currentBattery = parseInt(batterySpan.textContent);
+                    if (currentBattery > 20) {
+                        batterySpan.textContent = `${Math.max(20, currentBattery - Math.random() * 2).toFixed(0)}%`;
+                    }
+
+                    // Update temperature
+                    const tempSpan = document.getElementById('temperature');
+                    const baseTemp = 24;
+                    const newTemp = baseTemp + (Math.random() - 0.5) * 4;
+                    tempSpan.textContent = `${newTemp.toFixed(1)}°C`;
+
+                    // Update detected plants count
+                    const detectedCount = document.getElementById('detectedCount');
+                    detectedCount.textContent = Math.floor(Math.random() * 5) + 1;
+                }, 5000);
+            }
+
+            startDataUpdates() {
+                setInterval(() => {
+                    this.updateStatistics();
+                }, 10000);
+            }
+
+            updateStatistics() {
+                // Update plants detected
+                const plantsDetected = document.getElementById('plantsDetectedStat');
+                const current = parseInt(plantsDetected.textContent);
+                plantsDetected.textContent = current + Math.floor(Math.random() * 3);
+
+                // Update water used
+                const waterUsed = document.getElementById('waterUsedStat');
+                const currentWater = parseFloat(waterUsed.textContent);
+                waterUsed.textContent = `${(currentWater + Math.random() * 0.1).toFixed(1)}L`;
+
+                // Update distance
+                const distance = document.getElementById('distanceStat');
+                const currentDistance = parseInt(distance.textContent);
+                distance.textContent = `${currentDistance + Math.floor(Math.random() * 5)}m`;
+            }
+
+            logActivity(message, type = 'system') {
+                const logContainer = document.getElementById('logContainer');
+                const timestamp = new Date().toLocaleTimeString();
+
+                const logEntry = document.createElement('div');
+                logEntry.className = 'log-entry';
+                logEntry.innerHTML = `
+                    <span class="log-time">${timestamp}</span>
+                    <span class="log-action ${type}">${message}</span>
+                `;
+
+                logContainer.insertBefore(logEntry, logContainer.firstChild);
+
+                // Keep only last 10 entries
+                while (logContainer.children.length > 10) {
+                    logContainer.removeChild(logContainer.lastChild);
+                }
+            }
+        }
+
+        // Initialize dashboard when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new SASIBotDashboard();
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.target.tagName === 'INPUT') return;
+
+            switch (e.key.toLowerCase()) {
+                case 'w':
+                case 'arrowup':
+                    document.querySelector('[data-direction="forward"]').click();
+                    break;
+                case 's':
+                case 'arrowdown':
+                    document.querySelector('[data-direction="backward"]').click();
+                    break;
+                case 'a':
+                case 'arrowleft':
+                    document.querySelector('[data-direction="left"]').click();
+                    break;
+                case 'd':
+                case 'arrowright':
+                    document.querySelector('[data-direction="right"]').click();
+                    break;
+                case ' ':
+                    e.preventDefault();
+                    document.querySelector('[data-direction="stop"]').click();
+                    break;
+                case 'r':
+                    document.getElementById('recordBtn').click();
+                    break;
+                case 'f':
+                    document.getElementById('fullscreenBtn').click();
+                    break;
+            }
+        });
+
+        // Handle keyboard key release for movement
+        document.addEventListener('keyup', (e) => {
+            if (e.target.tagName === 'INPUT') return;
+
+            if (['w', 's', 'a', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(e.key.toLowerCase())) {
+                document.querySelector('[data-direction="stop"]').click();
+            }
+        });
+    </script>
+</body>
+</html>

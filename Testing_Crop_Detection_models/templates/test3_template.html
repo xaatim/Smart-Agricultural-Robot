@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SASI-Bot Control Dashboard</title>
+    <style>
+        :root {
+            --primary: #4CAF50;
+            --primary-dark: #388E3C;
+            --secondary: #FF9800;
+            --dark: #333;
+            --light: #f9f9f9;
+            --gray: #e0e0e0;
+            --danger: #f44336;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            color: var(--dark);
+        }
+        
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: auto 1fr 1fr;
+            gap: 20px;
+            padding: 20px;
+            height: 100vh;
+            max-width: 1800px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            grid-column: 1 / -1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .logo h1 {
+            color: var(--primary);
+            font-size: 1.8rem;
+        }
+        
+        .logo-icon {
+            font-size: 2rem;
+            color: var(--primary);
+        }
+        
+        .status-indicators {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-weight: 500;
+        }
+        
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        
+        .online {
+            background-color: var(--primary);
+        }
+        
+        .offline {
+            background-color: var(--danger);
+        }
+        
+        .video-container {
+            background-color: white;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .video-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+        
+        .video-feed {
+            background-color: black;
+            border-radius: 8px;
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .video-feed img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+        
+        .video-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 15px;
+            color: white;
+            background: linear-gradient(transparent 60%, rgba(0,0,0,0.7));
+        }
+        
+        .detection-info {
+            font-size: 0.9rem;
+        }
+        
+        .controls {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .control-section {
+            margin-bottom: 20px;
+        }
+        
+        .control-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--primary-dark);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .joystick-container {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto;
+            position: relative;
+            background-color: var(--gray);
+            border-radius: 50%;
+            touch-action: none;
+        }
+        
+        .joystick {
+            width: 60px;
+            height: 60px;
+            background-color: var(--primary);
+            border-radius: 50%;
+            position: absolute;
+            top: 70px;
+            left: 70px;
+            cursor: move;
+        }
+        
+        .button-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .control-btn {
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background-color: var(--primary);
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+        
+        .control-btn:hover {
+            background-color: var(--primary-dark);
+        }
+        
+        .control-btn.water {
+            background-color: var(--secondary);
+        }
+        
+        .control-btn.water:hover {
+            background-color: #F57C00;
+        }
+        
+        .control-btn.stop {
+            background-color: var(--danger);
+        }
+        
+        .control-btn.stop:hover {
+            background-color: #D32F2F;
+        }
+        
+        .presets {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .preset-btn {
+            padding: 8px 15px;
+            background-color: var(--gray);
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .preset-btn:hover {
+            background-color: #d0d0d0;
+        }
+        
+        .preset-btn.active {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .data-panel {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow-y: auto;
+        }
+        
+        .data-title {
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: var(--primary-dark);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .log-entry {
+            padding: 10px 0;
+            border-bottom: 1px solid var(--gray);
+            font-size: 0.9rem;
+        }
+        
+        .log-time {
+            color: #777;
+            font-size: 0.8rem;
+            margin-bottom: 3px;
+        }
+        
+        .log-message {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .log-icon {
+            color: var(--primary);
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .stat-card {
+            background-color: var(--light);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin: 5px 0;
+        }
+        
+        .stat-label {
+            font-size: 0.8rem;
+            color: #777;
+        }
+        
+        .plant-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 0.9rem;
+        }
+        
+        .plant-table th, .plant-table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid var(--gray);
+        }
+        
+        .plant-table th {
+            background-color: var(--light);
+            font-weight: 600;
+        }
+        
+        .plant-type {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .plant-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.8rem;
+        }
+        
+        @media (max-width: 1200px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+                height: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <header class="header">
+            <div class="logo">
+                <span class="logo-icon">🤖</span>
+                <h1>SASI-Bot Dashboard</h1>
+            </div>
+            <div class="status-indicators">
+                <div class="status">
+                    <span class="status-dot online"></span>
+                    <span>Bot Online</span>
+                </div>
+                <div class="status">
+                    <span class="status-dot online"></span>
+                    <span>Camera Active</span>
+                </div>
+                <div class="status">
+                    <span class="status-dot online"></span>
+                    <span>WiFi Strong</span>
+                </div>
+            </div>
+        </header>
+        
+        <div class="video-container">
+            <div class="video-header">
+                <h2>Live Camera Feed</h2>
+                <div>
+                    <select>
+                        <option>Detection Mode: Plants</option>
+                        <option>Detection Mode: All Objects</option>
+                        <option>Raw Feed</option>
+                    </select>
+                </div>
+            </div>
+            <div class="video-feed">
+                <img src="https://via.placeholder.com/800x450?text=ESP32-CAM+Feed" alt="Live Camera Feed">
+                <div class="video-overlay">
+                    <div class="detection-info">
+                        Detected: 3 Chili plants | Confidence: 92% | Water needed: 150ml
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <div class="control-section">
+                <h3 class="control-title">🚗 Manual Control</h3>
+                <div class="joystick-container">
+                    <div class="joystick"></div>
+                </div>
+                <div class="button-grid">
+                    <button class="control-btn">⬆️ Forward</button>
+                    <button class="control-btn water">💧 Water</button>
+                    <button class="control-btn">⬆️ Forward</button>
+                    <button class="control-btn">⬅️ Left</button>
+                    <button class="control-btn stop">🛑 Stop</button>
+                    <button class="control-btn">➡️ Right</button>
+                    <button class="control-btn">⬇️ Backward</button>
+                    <button class="control-btn">📸 Capture</button>
+                    <button class="control-btn">⬇️ Backward</button>
+                </div>
+            </div>
+            
+            <div class="control-section">
+                <h3 class="control-title">🌱 Watering Presets</h3>
+                <div class="presets">
+                    <button class="preset-btn active">Chili (150ml)</button>
+                    <button class="preset-btn">Spinach (100ml)</button>
+                    <button class="preset-btn">Tomato (200ml)</button>
+                    <button class="preset-btn">Custom...</button>
+                </div>
+            </div>
+            
+            <div class="control-section">
+                <h3 class="control-title">⚙️ System Controls</h3>
+                <div class="button-grid" style="grid-template-columns: repeat(2, 1fr);">
+                    <button class="control-btn">🔍 Start Scan</button>
+                    <button class="control-btn">🔄 Reconnect</button>
+                    <button class="control-btn">📊 Calibrate</button>
+                    <button class="control-btn">🔧 Settings</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="data-panel">
+            <h3 class="data-title">📝 Activity Log</h3>
+            <div class="log-entry">
+                <div class="log-time">10:24:35 AM</div>
+                <div class="log-message">
+                    <span class="log-icon">💧</span>
+                    Watered 3 Chili plants (150ml each)
+                </div>
+            </div>
+            <div class="log-entry">
+                <div class="log-time">10:22:10 AM</div>
+                <div class="log-message">
+                    <span class="log-icon">🌿</span>
+                    Detected 3 Chili plants (92% confidence)
+                </div>
+            </div>
+            <div class="log-entry">
+                <div class="log-time">10:21:45 AM</div>
+                <div class="log-message">
+                    <span class="log-icon">🚗</span>
+                    Moved forward 1.2 meters
+                </div>
+            </div>
+            <div class="log-entry">
+                <div class="log-time">10:20:30 AM</div>
+                <div class="log-message">
+                    <span class="log-icon">🔍</span>
+                    Started scanning routine
+                </div>
+            </div>
+            <div class="log-entry">
+                <div class="log-time">10:19:15 AM</div>
+                <div class="log-message">
+                    <span class="log-icon">✅</span>
+                    System check completed - All systems normal
+                </div>
+            </div>
+        </div>
+        
+        <div class="data-panel">
+            <h3 class="data-title">📊 Today's Stats</h3>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Plants Watered</div>
+                    <div class="stat-value">24</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Water Used</div>
+                    <div class="stat-value">3.6L</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Distance Covered</div>
+                    <div class="stat-value">48m</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Detection Accuracy</div>
+                    <div class="stat-value">94%</div>
+                </div>
+            </div>
+            
+            <h3 class="data-title" style="margin-top: 20px;">🌿 Detected Plants</h3>
+            <table class="plant-table">
+                <thead>
+                    <tr>
+                        <th>Plant</th>
+                        <th>Count</th>
+                        <th>Last Watered</th>
+                        <th>Next Water</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <div class="plant-type">
+                                <span class="plant-icon">🌶️</span>
+                                <span>Chili</span>
+                            </div>
+                        </td>
+                        <td>12</td>
+                        <td>10:24 AM</td>
+                        <td>Tomorrow 10 AM</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="plant-type">
+                                <span class="plant-icon">🥬</span>
+                                <span>Spinach</span>
+                            </div>
+                        </td>
+                        <td>8</td>
+                        <td>9:45 AM</td>
+                        <td>Today 6 PM</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="plant-type">
+                                <span class="plant-icon">🍅</span>
+                                <span>Tomato</span>
+                            </div>
+                        </td>
+                        <td>4</td>
+                        <td>9:30 AM</td>
+                        <td>Tomorrow 9 AM</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // This would be replaced with actual WebSocket/API calls in implementation
+        document.querySelectorAll('.control-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const action = this.textContent.trim();
+                console.log(`Action triggered: ${action}`);
+                // Here you would send the command to your Flask backend
+            });
+        });
+        
+        // Simple joystick simulation
+        const joystick = document.querySelector('.joystick');
+        const container = document.querySelector('.joystick-container');
+        
+        let isDragging = false;
+        
+        joystick.addEventListener('mousedown', () => {
+            isDragging = true;
+        });
+        
+        document.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            
+            const containerRect = container.getBoundingClientRect();
+            const centerX = containerRect.left + containerRect.width / 2;
+            const centerY = containerRect.top + containerRect.height / 2;
+            
+            let x = e.clientX - centerX;
+            let y = e.clientY - centerY;
+            
+            // Limit to circle bounds
+            const distance = Math.sqrt(x * x + y * y);
+            const maxDistance = containerRect.width / 2 - joystick.offsetWidth / 2;
+            
+            if (distance > maxDistance) {
+                x = x * maxDistance / distance;
+                y = y * maxDistance / distance;
+            }
+            
+            joystick.style.transform = `translate(${x}px, ${y}px)`;
+            
+            // Calculate direction (this would send commands to the bot)
+            const angle = Math.atan2(y, x) * 180 / Math.PI;
+            console.log(`Joystick angle: ${angle.toFixed(1)}°`);
+        });
+        
+        document.addEventListener('mouseup', () => {
+            isDragging = false;
+            joystick.style.transform = 'translate(0, 0)';
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SASI-Bot Dashboard</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap">
+    <style>
+        /* ========================================================== */
+        /* CSS STYLING - STARTS HERE                                  */
+        /* ========================================================== */
+
+        /* General Body & Container Styling */
+        body {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            background-color: #0d1117; /* Dark background */
+            color: #c9d1d9; /* Light text color */
+            overflow: hidden; /* Prevents scrollbars */
+        }
+
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: 280px 1fr 320px; /* Left, Main, Right column widths */
+            height: 100vh;
+            gap: 20px;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        /* Sidebar Styling */
+        .sidebar {
+            background-color: #161b22; /* Darker panel color */
+            border-radius: 15px;
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+        }
+
+        .left-sidebar {
+            justify-content: space-between;
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .logo h1 {
+            font-size: 2.2em;
+            font-weight: 700;
+            color: #58a6ff; /* A bright blue for the logo */
+            margin: 0;
+        }
+
+        .logo span {
+            font-size: 0.9em;
+            color: #8b949e;
+            letter-spacing: 1px;
+        }
+
+        .nav-menu ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .nav-menu li {
+            margin-bottom: 15px;
+        }
+
+        .nav-menu a {
+            text-decoration: none;
+            color: #c9d1d9;
+            font-weight: 600;
+            padding: 10px 15px;
+            display: block;
+            border-radius: 10px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .nav-menu a:hover, .nav-menu .active a {
+            background-color: #21262d;
+            color: #58a6ff;
+        }
+
+        /* Status Panel */
+        .status-panel {
+            border-top: 2px solid #21262d;
+            padding-top: 20px;
+        }
+
+        .status-panel h3 {
+            margin-top: 0;
+            margin-bottom: 20px;
+            color: #8b949e;
+            text-transform: uppercase;
+            font-size: 0.9em;
+            letter-spacing: 1px;
+        }
+
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 0.95em;
+        }
+
+        .status-indicator {
+            font-weight: 600;
+        }
+
+        .status-indicator.online {
+            color: #3fb950; /* Green for online */
+        }
+
+        .status-indicator.offline {
+            color: #f85149; /* Red for offline */
+        }
+
+        /* Main Content Area */
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .video-container {
+            position: relative;
+            background-color: #000;
+            border-radius: 15px;
+            overflow: hidden;
+            height: 70vh; /* Adjust as needed */
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6);
+        }
+
+        #video-feed {
+            width: 100%;
+            height: 100%;
+            object-fit: contain; /* Ensures the aspect ratio is maintained */
+            display: block;
+        }
+
+        .detection-overlay {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background-color: rgba(0, 0, 0, 0.6);
+            padding: 10px 15px;
+            border-radius: 10px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .detected-label {
+            color: #8b949e;
+            font-weight: 400;
+        }
+
+        .detected-plant-name {
+            color: #79c0ff; /* Bright blue for detected plant name */
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .overlay-controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .overlay-controls button {
+            background-color: rgba(33, 38, 45, 0.8);
+            color: #c9d1d9;
+            border: 1px solid #30363d;
+            padding: 8px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.3s;
+        }
+
+        .overlay-controls button:hover {
+            background-color: rgba(46, 52, 60, 0.9);
+        }
+
+        .control-section {
+            background-color: #161b22;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+            text-align: center;
+        }
+
+        /* Control Panel (Right Sidebar) */
+        .control-panel h3, .log-panel h3 {
+            color: #c9d1d9;
+            font-size: 1.2em;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #21262d;
+            padding-bottom: 10px;
+        }
+
+        .joystick-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .direction-buttons {
+            display: grid;
+            grid-template-areas:
+                ". up ."
+                "left middle right"
+                ". down .";
+            gap: 10px;
+        }
+
+        .direction-buttons .manual-btn {
+            width: 60px;
+            height: 60px;
+            font-size: 1.5em;
+            font-weight: bold;
+            border-radius: 10px;
+            background-color: #21262d;
+            color: #c9d1d9;
+            border: 1px solid #30363d;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+
+        .direction-buttons .manual-btn:hover {
+            background-color: #2f363d;
+            transform: scale(1.05);
+        }
+
+        #move-forward { grid-area: up; }
+        #turn-left { grid-area: left; }
+        #turn-right { grid-area: right; }
+        #move-backward { grid-area: down; }
+        .stop-btn { grid-area: middle; background-color: #d23d47; color: white; border-color: #f85149; }
+        .stop-btn:hover { background-color: #f85149; }
+
+        /* Watering Presets */
+        .watering-presets {
+            margin-top: 30px;
+        }
+
+        .preset-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .preset-btn {
+            flex-grow: 1;
+            padding: 12px;
+            border-radius: 10px;
+            background-color: #21262d;
+            color: #79c0ff;
+            border: 1px solid #30363d;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s, border-color 0.2s;
+        }
+
+        .preset-btn:hover, .preset-btn.active {
+            background-color: #2f363d;
+            border-color: #58a6ff;
+        }
+
+        .custom-watering-input {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .custom-watering-input label {
+            font-size: 0.9em;
+            color: #8b949e;
+        }
+
+        .custom-watering-input input {
+            width: 60px;
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #30363d;
+            background-color: #0d1117;
+            color: #c9d1d9;
+        }
+
+        /* Buttons */
+        .control-button {
+            padding: 12px 25px;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            border: none;
+            transition: background-color 0.3s, transform 0.1s;
+        }
+
+        .primary {
+            background-color: #2ea043; /* Green for start/go */
+            color: #fff;
+        }
+        .primary:hover {
+            background-color: #3fb950;
+            transform: translateY(-2px);
+        }
+
+        .danger {
+            background-color: #f85149; /* Red for stop/danger */
+            color: #fff;
+        }
+        .danger:hover {
+            background-color: #c93d3b;
+            transform: translateY(-2px);
+        }
+
+        /* Activity Log */
+        .log-panel {
+            background-color: #161b22;
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 20px;
+            flex-grow: 1;
+            overflow-y: auto; /* Make the log scrollable */
+            max-height: 300px;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+
+        #activity-log {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            font-size: 0.9em;
+        }
+
+        #activity-log li {
+            margin-bottom: 8px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .log-timestamp {
+            color: #8b949e;
+            margin-right: 10px;
+        }
+
+        /* Scrollbar styling for dark theme */
+        .log-panel::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .log-panel::-webkit-scrollbar-track {
+            background: #1e242c;
+            border-radius: 10px;
+        }
+
+        .log-panel::-webkit-scrollbar-thumb {
+            background: #444c56;
+            border-radius: 10px;
+        }
+
+        .log-panel::-webkit-scrollbar-thumb:hover {
+            background: #586069;
+        }
+
+        /* ========================================================== */
+        /* CSS STYLING - ENDS HERE                                    */
+        /* ========================================================== */
+    </style>
+</head>
+<body>
+
+    <div class="dashboard-container">
+
+        <div class="sidebar left-sidebar">
+            <div class="logo">
+                <h1>SASI-Bot</h1>
+                <span>Smart Agri-Surveillance</span>
+            </div>
+            <nav class="nav-menu">
+                <ul>
+                    <li class="active"><a href="#live-feed">Live Feed</a></li>
+                    <li><a href="#logs">Watering Logs</a></li>
+                    <li><a href="#history">Detection History</a></li>
+                    <li><a href="#settings">Settings</a></li>
+                </ul>
+            </nav>
+            <div class="status-panel">
+                <h3>System Status</h3>
+                <div class="status-item">
+                    <span class="status-label">Connection:</span>
+                    <span id="connection-status" class="status-indicator offline">Offline</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">Battery:</span>
+                    <span id="battery-level" class="status-indicator">--%</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">Location:</span>
+                    <span id="location-data" class="status-indicator">--</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="video-container">
+                <img id="video-feed" src="http://[ESP32_CAM_IP]:81/stream" alt="Live Video Feed" crossorigin="anonymous">
+                
+                <div class="detection-overlay">
+                    <div id="detection-info">
+                        <span class="detected-label">Detected: </span>
+                        <span class="detected-plant-name">Scanning...</span>
+                    </div>
+                </div>
+                <div class="overlay-controls">
+                    <button id="toggle-yolo">Toggle YOLO</button>
+                    <button id="capture-image">Capture</button>
+                </div>
+            </div>
+
+            <div class="control-section">
+                <h2>Autonomous Mode</h2>
+                <div class="autonomous-controls">
+                    <button id="start-auto" class="control-button primary">Start Mission</button>
+                    <button id="stop-auto" class="control-button danger">Stop Mission</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="sidebar right-sidebar">
+            <div class="control-panel">
+                <h3>Manual Control</h3>
+                <div class="joystick-container">
+                    <div class="direction-buttons">
+                        <button id="move-forward" class="manual-btn">▲</button>
+                        <div class="middle-row">
+                            <button id="turn-left" class="manual-btn">◀</button>
+                            <button id="stop" class="manual-btn stop-btn">◼</button>
+                            <button id="turn-right" class="manual-btn">▶</button>
+                        </div>
+                        <button id="move-backward" class="manual-btn">▼</button>
+                    </div>
+                </div>
+                <div class="watering-presets">
+                    <h3>Watering Presets</h3>
+                    <div class="preset-buttons">
+                        <button class="preset-btn" data-preset="chili">Chili Plant</button>
+                        <button class="preset-btn" data-preset="spinach">Spinach</button>
+                        <button class="preset-btn" data-preset="custom">Custom</button>
+                    </div>
+                    <div class="custom-watering-input">
+                        <label for="water-duration">Duration (s):</label>
+                        <input type="number" id="water-duration" min="1" max="60" value="5">
+                        <button id="manual-water" class="control-button">Water Now</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="log-panel">
+                <h3>Activity Log</h3>
+                <ul id="activity-log">
+                    <li><span class="log-timestamp">[--:--]</span> Waiting for connection...</li>
+                </ul>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const videoFeed = document.getElementById('video-feed');
+            const detectionInfo = document.getElementById('detection-info');
+            const activityLog = document.getElementById('activity-log');
+
+            // --- 1. WebSocket/MQTT Communication ---
+            // Example using a WebSocket connection.
+            // IMPORTANT: Change this URL to match your Flask server's WebSocket endpoint.
+            // If running on the same machine, 'localhost' is fine.
+            const socket = new WebSocket('ws://' + window.location.hostname + ':5000/ws'); 
+
+            socket.onopen = () => {
+                console.log('WebSocket connection established.');
+                document.getElementById('connection-status').textContent = 'Online';
+                document.getElementById('connection-status').classList.remove('offline');
+                document.getElementById('connection-status').classList.add('online');
+                addLogEntry('Connection to robot established.', 'success');
+            };
+
+            socket.onmessage = (event) => {
+                // Parse the JSON data sent from the Flask backend
+                const data = JSON.parse(event.data);
+
+                // Update the UI based on the received data
+                if (data.type === 'detection') {
+                    detectionInfo.innerHTML = `<span class="detected-label">Detected: </span><span class="detected-plant-name">${data.plant_name} (${data.confidence}%)</span>`;
+                } else if (data.type === 'log') {
+                    addLogEntry(data.message);
+                } else if (data.type === 'status') {
+                    // Update battery, location, etc.
+                    document.getElementById('battery-level').textContent = `${data.battery}%`;
+                    document.getElementById('location-data').textContent = data.location;
+                }
+            };
+
+            socket.onclose = () => {
+                console.log('WebSocket connection closed.');
+                document.getElementById('connection-status').textContent = 'Offline';
+                document.getElementById('connection-status').classList.remove('online');
+                document.getElementById('connection-status').classList.add('offline');
+                addLogEntry('Connection to robot lost!', 'danger');
+            };
+
+            socket.onerror = (error) => {
+                console.error('WebSocket Error:', error);
+                addLogEntry('WebSocket error occurred.', 'error');
+            };
+
+            // --- 2. Button and Control Logic ---
+
+            // Manual Movement Buttons - Use mousedown/mouseup for real-time control
+            // This is better for "joystick" feel
+            document.getElementById('move-forward').addEventListener('mousedown', () => sendCommand('move', 'forward'));
+            document.getElementById('move-backward').addEventListener('mousedown', () => sendCommand('move', 'backward'));
+            document.getElementById('turn-left').addEventListener('mousedown', () => sendCommand('move', 'left'));
+            document.getElementById('turn-right').addEventListener('mousedown', () => sendCommand('move', 'right'));
+            
+            // Stop movement when the mouse is released or moves off the button
+            document.querySelectorAll('.manual-btn').forEach(btn => {
+                btn.addEventListener('mouseup', () => sendCommand('move', 'stop'));
+                btn.addEventListener('mouseout', () => sendCommand('move', 'stop')); 
+            });
+
+            document.getElementById('stop').addEventListener('click', () => sendCommand('move', 'stop'));
+
+            // Watering Presets
+            document.querySelectorAll('.preset-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const preset = btn.dataset.preset;
+                    sendCommand('water', preset);
+                    addLogEntry(`Watering preset '${preset}' triggered.`);
+                });
+            });
+
+            // Custom Watering
+            document.getElementById('manual-water').addEventListener('click', () => {
+                const duration = document.getElementById('water-duration').value;
+                sendCommand('water_custom', duration);
+                addLogEntry(`Manual watering for ${duration} seconds started.`);
+            });
+
+            // Autonomous Mode
+            document.getElementById('start-auto').addEventListener('click', () => {
+                sendCommand('mode', 'autonomous');
+                addLogEntry('Autonomous mission started.', 'success');
+            });
+
+            document.getElementById('stop-auto').addEventListener('click', () => {
+                sendCommand('mode', 'manual');
+                addLogEntry('Autonomous mission stopped.', 'danger');
+            });
+
+            // Toggle YOLO
+            document.getElementById('toggle-yolo').addEventListener('click', () => {
+                sendCommand('yolo', 'toggle');
+                addLogEntry('YOLO detection toggled.');
+            });
+
+            // Capture Image
+            document.getElementById('capture-image').addEventListener('click', () => {
+                sendCommand('capture', 'image');
+                addLogEntry('Image capture command sent.');
+            });
+
+            // --- 3. Helper Functions ---
+            
+            // Function to send command to the backend via WebSocket
+            function sendCommand(command, value) {
+                if (socket.readyState === WebSocket.OPEN) {
+                    socket.send(JSON.stringify({ command: command, value: value }));
+                } else {
+                    console.error('WebSocket is not open. Cannot send command.');
+                    addLogEntry('Error: Robot is offline.', 'error');
+                }
+            }
+
+            // Function to add a new entry to the activity log
+            function addLogEntry(message, type = 'info') {
+                const logList = document.getElementById('activity-log');
+                const newLogItem = document.createElement('li');
+                const timestamp = new Date().toLocaleTimeString('en-US', { hour12: false });
+                
+                newLogItem.innerHTML = `<span class="log-timestamp">[${timestamp}]</span> ${message}`;
+                
+                // Add a class for different log types (e.g., success, error, info)
+                if (type === 'success') {
+                    newLogItem.style.color = '#3fb950';
+                } else if (type === 'danger' || type === 'error') {
+                    newLogItem.style.color = '#f85149';
+                } else {
+                    newLogItem.style.color = '#c9d1d9'; // Default color
+                }
+
+                logList.prepend(newLogItem); // Add to the top
+                // Optional: limit the number of log entries to prevent overflow
+                if (logList.children.length > 50) {
+                    logList.removeChild(logList.lastChild);
+                }
+            }
+
+        });
+    </script>
+    </body>
+</html>

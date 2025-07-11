@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SASI-Bot Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f1419 0%, #1a2332 50%, #2d4a22 100%);
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        .header {
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            border-bottom: 2px solid #4ade80;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            background: linear-gradient(45deg, #4ade80, #22d3ee);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: inline-block;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { filter: drop-shadow(0 0 5px #4ade8050); }
+            to { filter: drop-shadow(0 0 20px #4ade8080); }
+        }
+
+        .status-bar {
+            display: flex;
+            gap: 2rem;
+            margin-top: 0.5rem;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .status-dot.online { background: #4ade80; }
+        .status-dot.camera { background: #22d3ee; }
+        .status-dot.water { background: #3b82f6; }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+            padding: 2rem;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .main-panel {
+            display: grid;
+            grid-template-rows: auto 1fr;
+            gap: 1.5rem;
+        }
+
+        .video-container {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 20px;
+            padding: 1.5rem;
+            border: 2px solid #4ade8020;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .video-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent 48%, #4ade8010 49%, #4ade8010 51%, transparent 52%);
+            pointer-events: none;
+        }
+
+        .video-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .video-title {
+            font-size: 1.3rem;
+            color: #4ade80;
+        }
+
+        .video-controls {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            transform: translate(-50%, -50%);
+        }
+
+        .btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #4ade80, #22d3ee);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .video-feed {
+            width: 100%;
+            height: 400px;
+            background: #000;
+            border-radius: 15px;
+            position: relative;
+            overflow: hidden;
+            border: 2px solid #333;
+        }
+
+        .video-placeholder {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            font-size: 1.2rem;
+            color: #666;
+            background: radial-gradient(circle at center, #111 0%, #000 100%);
+        }
+
+        .detection-overlay {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 0.5rem;
+            border-radius: 10px;
+            font-size: 0.9rem;
+        }
+
+        .control-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .control-panel {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 20px;
+            padding: 1.5rem;
+            border: 2px solid #4ade8020;
+            backdrop-filter: blur(5px);
+        }
+
+        .control-title {
+            font-size: 1.2rem;
+            color: #4ade80;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .joystick-container {
+            display: flex;
+            justify-content: center;
+            margin: 2rem 0;
+        }
+
+        .joystick {
+            width: 120px;
+            height: 120px;
+            border: 3px solid #4ade80;
+            border-radius: 50%;
+            position: relative;
+            background: radial-gradient(circle at center, #4ade8020 0%, transparent 70%);
+            cursor: pointer;
+        }
+
+        .joystick-knob {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(45deg, #4ade80, #22d3ee);
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 20px #4ade8080;
+            transition: all 0.1s ease;
+        }
+
+        .direction-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.5rem;
+            max-width: 150px;
+            margin: 1rem auto;
+        }
+
+        .direction-btn {
+            width: 40px;
+            height: 40px;
+            border: none;
+            border-radius: 10px;
+            background: rgba(74, 222, 128, 0.2);
+            color: #4ade80;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .direction-btn:hover {
+            background: #4ade80;
+            color: black;
+            transform: scale(1.1);
+        }
+
+        .direction-btn:nth-child(2) { grid-column: 2; }
+        .direction-btn:nth-child(3) { grid-column: 1; grid-row: 2; }
+        .direction-btn:nth-child(4) { grid-column: 3; grid-row: 2; }
+        .direction-btn:nth-child(5) { grid-column: 2; grid-row: 3; }
+
+        .watering-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .water-slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: #333;
+            outline: none;
+        }
+
+        .water-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #4ade80, #22d3ee);
+            cursor: pointer;
+            box-shadow: 0 0 10px #4ade8080;
+        }
+
+        .side-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .info-panel {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 20px;
+            padding: 1.5rem;
+            border: 2px solid #4ade8020;
+            backdrop-filter: blur(5px);
+        }
+
+        .info-title {
+            font-size: 1.2rem;
+            color: #4ade80;
+            margin-bottom: 1rem;
+        }
+
+        .detection-list {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .detection-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem;
+            margin: 0.5rem 0;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            border-left: 3px solid #4ade80;
+        }
+
+        .detection-confidence {
+            font-size: 0.8rem;
+            color: #22d3ee;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 1rem;
+            border-radius: 15px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #4ade80;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #ccc;
+            margin-top: 0.5rem;
+        }
+
+        .activity-log {
+            max-height: 250px;
+            overflow-y: auto;
+        }
+
+        .log-item {
+            padding: 0.8rem;
+            margin: 0.5rem 0;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            border-left: 3px solid #22d3ee;
+            font-size: 0.9rem;
+        }
+
+        .log-time {
+            color: #888;
+            font-size: 0.8rem;
+        }
+
+        .emergency-stop {
+            background: linear-gradient(45deg, #ef4444, #dc2626) !important;
+            color: white;
+            font-size: 1.1rem;
+            padding: 1rem 2rem;
+            animation: emergencyPulse 1s infinite alternate;
+        }
+
+        @keyframes emergencyPulse {
+            from { box-shadow: 0 0 10px #ef444480; }
+            to { box-shadow: 0 0 30px #ef4444ff; }
+        }
+
+        .mode-selector {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .mode-btn {
+            flex: 1;
+            padding: 0.5rem;
+            border: 2px solid #4ade8040;
+            background: transparent;
+            color: #4ade80;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .mode-btn.active {
+            background: #4ade80;
+            color: black;
+        }
+
+        @media (max-width: 1200px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .control-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>🤖 SASI-Bot Control Center</h1>
+        <div class="status-bar">
+            <div class="status-item">
+                <div class="status-dot online"></div>
+                <span>Bot Online</span>
+            </div>
+            <div class="status-item">
+                <div class="status-dot camera"></div>
+                <span>Camera Active</span>
+            </div>
+            <div class="status-item">
+                <div class="status-dot water"></div>
+                <span>Water System Ready</span>
+            </div>
+        </div>
+    </header>
+
+    <div class="dashboard-grid">
+        <div class="main-panel">
+            <div class="video-container">
+                <div class="video-header">
+                    <h3 class="video-title">📷 Live Camera Feed</h3>
+                    <div class="video-controls">
+                        <button class="btn btn-secondary" onclick="toggleRecording()">🔴 Record</button>
+                        <button class="btn btn-secondary" onclick="takeSnapshot()">📸 Snapshot</button>
+                        <button class="btn btn-primary" onclick="toggleDetection()">🔍 Detection ON</button>
+                    </div>
+                </div>
+                <div class="video-feed">
+                    <div class="video-placeholder">
+                        📡 Connecting to ESP32-CAM...
+                        <br><small>Stream will appear here</small>
+                    </div>
+                    <div class="detection-overlay">
+                        <div>🌶️ Chili Plants: 3 detected</div>
+                        <div>🥬 Spinach: 2 detected</div>
+                        <div>💧 Watering needed: 1 plant</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="control-grid">
+                <div class="control-panel">
+                    <h3 class="control-title">🕹️ Movement Control</h3>
+                    <div class="mode-selector">
+                        <button class="mode-btn active" onclick="setMode('manual')">Manual</button>
+                        <button class="mode-btn" onclick="setMode('auto')">Auto</button>
+                    </div>
+                    
+                    <div class="joystick-container">
+                        <div class="joystick" id="joystick">
+                            <div class="joystick-knob" id="joystick-knob"></div>
+                        </div>
+                    </div>
+
+                    <div class="direction-grid">
+                        <button class="direction-btn" onclick="move('forward')">↑</button>
+                        <button class="direction-btn" onclick="move('left')">←</button>
+                        <button class="direction-btn" onclick="move('right')">→</button>
+                        <button class="direction-btn" onclick="move('backward')">↓</button>
+                    </div>
+
+                    <button class="btn emergency-stop" onclick="emergencyStop()">🛑 EMERGENCY STOP</button>
+                </div>
+
+                <div class="control-panel">
+                    <h3 class="control-title">💧 Watering System</h3>
+                    <div class="watering-controls">
+                        <label>Water Volume: <span id="water-volume">50</span>ml</label>
+                        <input type="range" class="water-slider" min="10" max="200" value="50" 
+                               oninput="updateWaterVolume(this.value)">
+                        
+                        <label>Spray Duration: <span id="spray-duration">3</span>s</label>
+                        <input type="range" class="water-slider" min="1" max="10" value="3" 
+                               oninput="updateSprayDuration(this.value)">
+
+                        <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                            <button class="btn btn-primary" onclick="waterPlant()">💧 Water Now</button>
+                            <button class="btn btn-secondary" onclick="testSpray()">🧪 Test Spray</button>
+                        </div>
+
+                        <div style="margin-top: 1rem;">
+                            <h4 style="color: #22d3ee; margin-bottom: 0.5rem;">Presets:</h4>
+                            <button class="btn btn-secondary" onclick="setWaterPreset('chili')" style="margin: 0.2rem;">🌶️ Chili</button>
+                            <button class="btn btn-secondary" onclick="setWaterPreset('spinach')" style="margin: 0.2rem;">🥬 Spinach</button>
+                            <button class="btn btn-secondary" onclick="setWaterPreset('herbs')" style="margin: 0.2rem;">🌿 Herbs</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="side-panel">
+            <div class="info-panel">
+                <h3 class="info-title">🌱 Plant Detection</h3>
+                <div class="detection-list" id="detection-list">
+                    <div class="detection-item">
+                        <span>🌶️ Chili Plant</span>
+                        <span class="detection-confidence">94% confident</span>
+                    </div>
+                    <div class="detection-item">
+                        <span>🌶️ Chili Plant</span>
+                        <span class="detection-confidence">87% confident</span>
+                    </div>
+                    <div class="detection-item">
+                        <span>🥬 Spinach</span>
+                        <span class="detection-confidence">91% confident</span>
+                    </div>
+                    <div class="detection-item">
+                        <span>🥬 Spinach</span>
+                        <span class="detection-confidence">89% confident</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-panel">
+                <h3 class="info-title">📊 System Stats</h3>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value">127</div>
+                        <div class="stat-label">Plants Detected</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">45L</div>
+                        <div class="stat-label">Water Used</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">2.3km</div>
+                        <div class="stat-label">Distance Traveled</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">98%</div>
+                        <div class="stat-label">Success Rate</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-panel">
+                <h3 class="info-title">📋 Activity Log</h3>
+                <div class="activity-log" id="activity-log">
+                    <div class="log-item">
+                        <div>💧 Watered chili plant (50ml)</div>
+                        <div class="log-time">2 minutes ago</div>
+                    </div>
+                    <div class="log-item">
+                        <div>🌱 Detected new spinach plant</div>
+                        <div class="log-time">5 minutes ago</div>
+                    </div>
+                    <div class="log-item">
+                        <div>🚗 Moved to sector B-3</div>
+                        <div class="log-time">8 minutes ago</div>
+                    </div>
+                    <div class="log-item">
+                        <div>📸 Captured plant photo</div>
+                        <div class="log-time">12 minutes ago</div>
+                    </div>
+                    <div class="log-item">
+                        <div>💧 Watered herb garden (75ml)</div>
+                        <div class="log-time">18 minutes ago</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Joystick functionality
+        let isDragging = false;
+        const joystick = document.getElementById('joystick');
+        const knob = document.getElementById('joystick-knob');
+        
+        joystick.addEventListener('mousedown', startDrag);
+        document.addEventListener('mousemove', drag);
+        document.addEventListener('mouseup', stopDrag);
+
+        function startDrag(e) {
+            isDragging = true;
+        }
+
+        function drag(e) {
+            if (!isDragging) return;
+            
+            const rect = joystick.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            
+            const deltaX = e.clientX - centerX;
+            const deltaY = e.clientY - centerY;
+            const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+            const maxDistance = 40;
+            
+            if (distance <= maxDistance) {
+                knob.style.transform = `translate(${deltaX - 20}px, ${deltaY - 20}px)`;
+            } else {
+                const angle = Math.atan2(deltaY, deltaX);
+                const x = Math.cos(angle) * maxDistance;
+                const y = Math.sin(angle) * maxDistance;
+                knob.style.transform = `translate(${x - 20}px, ${y - 20}px)`;
+            }
+            
+            // Send movement commands based on joystick position
+            sendMovementCommand(deltaX, deltaY);
+        }
+
+        function stopDrag() {
+            isDragging = false;
+            knob.style.transform = 'translate(-50%, -50%)';
+            sendMovementCommand(0, 0); // Stop movement
+        }
+
+        // Control functions
+        function move(direction) {
+            console.log(`Moving ${direction}`);
+            addLogEntry(`🚗 Moving ${direction}`);
+            // Send command to ESP32
+        }
+
+        function emergencyStop() {
+            console.log('EMERGENCY STOP ACTIVATED');
+            addLogEntry('🛑 Emergency stop activated');
+            // Send emergency stop to ESP32
+        }
+
+        function waterPlant() {
+            const volume = document.getElementById('water-volume').textContent;
+            console.log(`Watering plant with ${volume}ml`);
+            addLogEntry(`💧 Watering plant (${volume}ml)`);
+            // Send watering command to ESP32
+        }
+
+        function testSpray() {
+            console.log('Testing spray system');
+            addLogEntry('🧪 Testing spray system');
+            // Send test spray command
+        }
+
+        function setWaterPreset(plantType) {
+            const presets = {
+                chili: { volume: 40, duration: 2 },
+                spinach: { volume: 60, duration: 3 },
+                herbs: { volume: 30, duration: 2 }
+            };
+            
+            if (presets[plantType]) {
+                document.querySelector('input[oninput*="updateWaterVolume"]').value = presets[plantType].volume;
+                document.querySelector('input[oninput*="updateSprayDuration"]').value = presets[plantType].duration;
+                updateWaterVolume(presets[plantType].volume);
+                updateSprayDuration(presets[plantType].duration);
+                addLogEntry(`🎯 Applied ${plantType} watering preset`);
+            }
+        }
+
+        function updateWaterVolume(value) {
+            document.getElementById('water-volume').textContent = value;
+        }
+
+        function updateSprayDuration(value) {
+            document.getElementById('spray-duration').textContent = value;
+        }
+
+        function setMode(mode) {
+            document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            addLogEntry(`⚙️ Switched to ${mode} mode`);
+        }
+
+        function toggleRecording() {
+            const btn = event.target;
+            if (btn.textContent.includes('Record')) {
+                btn.textContent = '⏹️ Stop';
+                btn.classList.add('emergency-stop');
+                addLogEntry('🔴 Started recording');
+            } else {
+                btn.textContent = '🔴 Record';
+                btn.classList.remove('emergency-stop');
+                addLogEntry('⏹️ Stopped recording');
+            }
+        }
+
+        function takeSnapshot() {
+            addLogEntry('📸 Snapshot captured');
+            // Capture image from video feed
+        }
+
+        function toggleDetection() {
+            const btn = event.target;
+            if (btn.textContent.includes('ON')) {
+                btn.textContent = '🔍 Detection OFF';
+                btn.classList.remove('btn-primary');
+                btn.classList.add('btn-secondary');
+            } else {
+                btn.textContent = '🔍 Detection ON';
+                btn.classList.remove('btn-secondary');
+                btn.classList.add('btn-primary');
+            }
+        }
+
+        function sendMovementCommand(x, y) {
+            // Convert joystick position to movement commands
+            // Send to ESP32 via WebSocket or HTTP
+        }
+
+        function addLogEntry(message) {
+            const logContainer = document.getElementById('activity-log');
+            const logItem = document.createElement('div');
+            logItem.className = 'log-item';
+            logItem.innerHTML = `
+                <div>${message}</div>
+                <div class="log-time">Just now</div>
+            `;
+            logContainer.insertBefore(logItem, logContainer.firstChild);
+            
+            // Keep only last 10 entries
+            while (logContainer.children.length > 10) {
+                logContainer.removeChild(logContainer.lastChild);
+            }
+        }
+
+        // Simulate real-time updates
+        setInterval(() => {
+            // Update detection data, stats, etc.
+            // This would normally come from your Python backend
+        }, 5000);
+
+        // Initialize
+        console.log('SASI-Bot Dashboard loaded successfully! 🤖');
+    </script>
+</body>
+</html>
