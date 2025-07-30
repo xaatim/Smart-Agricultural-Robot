@@ -2,11 +2,14 @@
 
 # 🌾 Semi-Autonomous Agriculture Robot
 
-[![ESP32](https://img.shields.io/badge/Microcontroller-ESP32-blue?logo=espressif)](https://www.espressif.com/)
-[![Raspberry Pi](https://img.shields.io/badge/Processing-Raspberry%20Pi-A22846?logo=raspberrypi)](https://www.raspberrypi.org/)
-[![YOLO](https://img.shields.io/badge/YOLO-Plant%20Detection-red?logo=pytorch)](https://pjreddie.com/darknet/yolo/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](./LICENSE)
-[![Status](https://img.shields.io/badge/Status-Prototype-orange)]()
+<p align="center">
+  <a href="https://www.espressif.com/"><img src="https://img.shields.io/badge/Microcontroller-ESP32-blue?logo=espressif"></a>
+  <a href="https://www.raspberrypi.org/"><img src="https://img.shields.io/badge/Processing-Raspberry%20Pi-A22846?logo=raspberrypi"></a>
+  <a href="https://pjreddie.com/darknet/yolo/"><img src="https://img.shields.io/badge/YOLO-Plant%20Detection-red?logo=pytorch"></a>
+  <a href="./LICENSE"><img src="https://img.shields.io/badge/License-MIT-green.svg"></a>
+  <img src="https://img.shields.io/badge/Status-Prototype-orange">
+</p>
+
 
 A **vision-guided semi-autonomous robot** for **smart agriculture**.
 It can **detect crops & weeds**, **monitor environmental conditions**, and **perform basic field tasks** like **localized spraying**, using **YOLO-based plant recognition**, **ESP32 microcontroller**, and **Raspberry Pi for processing**.
