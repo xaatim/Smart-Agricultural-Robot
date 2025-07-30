@@ -89,7 +89,7 @@ This project aims to support **precision farming** by combining **computer visio
 
 ## 📐 Prototype Sketch
 
-> *(Located in `extras/engineering_drawing.png`)*
+> *(Located in `extras/Prototype_sketch.png`)*
 
 ![Prototype Sketch](./extras/Prototype_sketch.png)
 *Figure: Mechanical design & assembly layout of the agriculture robot.*
