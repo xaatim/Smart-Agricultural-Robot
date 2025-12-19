@@ -1,5 +1,10 @@
 import cv2
-from ultralytics import YOLOWorld
+from ultralytics import YOLOWorld #type:ignore
+import time
+
+#arduino serial setup 
+
+time.sleep(2)  # wait for connection  
 
 # Initialize YOLO-World
 print("[INFO] Loading YOLO-World model...")
@@ -45,9 +50,12 @@ try:
       annotated_frame = results[0].plot()  # This adds boxes automatically
       
       # Display detection status
-      if len(results[0].boxes) > 0:
-          detected_items = [model.names[int(box.cls)] for box in results[0].boxes]
+      if len(results[0].boxes) > 0: # type: ignore
+          detected_items = [model.names[int(box.cls)] for box in results[0].boxes] # type: ignore
           status = f"Detected: {', '.join(detected_items)}"
+          
+          
+          
       else:
           status = "No crops detected"
       
