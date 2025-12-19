@@ -30,8 +30,8 @@
 #include <WiFiUdp.h>
 
 // --- CONFIGURATION ---
-const char* ssid = "Catiiqi_2.4G";       
-const char* password = "26252423"; 
+const char* ssid = "Unkown";       
+const char* password = "kkkkkkkk"; 
 const int localPort = 8888;              // Port to listen on
 
 // --- MOTOR PIN DEFINITIONS (NodeMCU D-Pins) ---

@@ -6,7 +6,7 @@ import keyboard  # <-- NEW IMPORT for driving
 
 # --- ESP32 Wi-Fi Configuration ---\
 CAMERA_URL = "http://192.168.0.175:81/stream"
-ESP_IP = "192.168.0.52"  # <-- IMPORTANT: Change this to the IP from ESP32 Serial Monitor
+ESP_IP = "10.49.226.43"  # <-- IMPORTANT: Change this to the IP from ESP32 Serial Monitor
 ESP_PORT = 8888
 WATERING_DURATION = 3  # Seconds to water for
 
