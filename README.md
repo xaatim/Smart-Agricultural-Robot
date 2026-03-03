@@ -1,131 +1,86 @@
----
 
-# 🌾 Semi-Autonomous Agriculture Robot
+# Beam Agri-Bot | Precision Dosing & Vision System
 
-<p align="center">
-  <a href="https://www.espressif.com/"><img src="https://img.shields.io/badge/Microcontroller-ESP32-blue?logo=espressif"></a>
-  <a href="https://www.raspberrypi.org/"><img src="https://img.shields.io/badge/Processing-Raspberry%20Pi-A22846?logo=raspberrypi"></a>
-  <a href="https://pjreddie.com/darknet/yolo/"><img src="https://img.shields.io/badge/YOLO-Plant%20Detection-red?logo=pytorch"></a>
-  <a href="./LICENSE"><img src="https://img.shields.io/badge/License-MIT-green.svg"></a>
-  <img src="https://img.shields.io/badge/Status-Prototype-orange">
-</p>
+![Python](https://img.shields.io/badge/python-3.10-blue?logo=python&logoColor=white)
+![AI](https://img.shields.io/badge/AI-YOLO--World-red)
+![Status](https://img.shields.io/badge/Status-In--Development-yellow)
+![License](https://img.shields.io/badge/License-MIT-blue)
 
-
-A **vision-guided semi-autonomous robot** for **smart agriculture**.
-It can **detect crops & weeds**, **monitor environmental conditions**, and **perform basic field tasks** like **localized spraying**, using **YOLO-based plant recognition**, **ESP32 microcontroller**, and **Raspberry Pi for processing**.
+The **Beam Agri-Bot** is an IoT-enabled mobile platform designed for high-precision agricultural intervention. By combining real-time object detection with targeted chemical dosing, the system minimizes waste and maximizes crop health through intelligent automation.
 
 ---
 
-## 📖 Overview
+## 🛠 Engineering & 3D Design
 
-This project aims to support **precision farming** by combining **computer vision**, **IoT**, and **mechanized tasks** in a single system:
+The Agri-Bot is built on a modular architecture, with custom-designed 3D components optimized for sensor integration and structural stability.
 
-* **YOLO-based plant recognition** to identify crops & weeds.
-* **ESP32-controlled motion & spraying** for precise field operations.
-* **Environmental monitoring** (soil moisture, temperature, humidity).
-* **Semi-autonomous navigation** with **manual override** for user control.
+### Custom 3D Components:
+- **Integrated Sensor Handle:** A specialized mount designed to house both the primary vision camera and the ultrasonic distance sensors, ensuring optimal alignment for detection and obstacle avoidance.
+- **Actuation Arm (v1):** The current fixed-position arm facilitates targeted liquid delivery to detected plant centers.
 
----
-
-## 🛠 Hardware Components
-
-| Component                | Purpose                                           |
-| ------------------------ | ------------------------------------------------- |
-| **Raspberry Pi 4**       | Runs YOLO & high-level Python logic               |
-| **ESP32**                | Handles motor control, sensors & spraying         |
-| **Motor Driver (L298N)** | Drives DC motors for movement                     |
-| **4WD Chassis**          | Field-ready mobile platform                       |
-| **Camera Module**        | Captures images for YOLO                          |
-| **Soil Moisture Sensor** | Monitors soil health                              |
-| **DHT11/22 Sensor**      | Measures temperature & humidity                   |
-| **Sprayer System**       | Enables localized chemical/fertilizer application |
-| **Li-ion Battery Pack**  | Powers the robot                                  |
+| 3D Handle (Camera/Ultrasonic) | 3D Fixed Arm Design |
+| :---: | :---: |
+| ![Handle](docs/hardware/3d_sensor_handle.png) | ![Arm](docs/hardware/3d_fixed_arm.png) |
 
 ---
 
-## ✨ Key Features
+## 🤖 Evolution & Prototype
 
-* **YOLO Plant Detection** – Identifies crops, weeds & plant health patterns.
-* **ESP32 IoT Control** – Low-latency motor & actuator management with wireless updates.
-* **Data Logging** – Environmental readings & detection results stored for later analysis.
-* **Localized Spraying** – Targeted application to reduce chemical waste.
-* **Manual Override Mode** – Switch between autonomous & user-driven control.
+The project has moved from a digital-twin phase into physical field testing. The current prototype validates the software-to-hardware triggering loop.
+
+![Physical Prototype](docs/hardware/prototype_v1.png)
 
 ---
 
-## 🔧 Setup Instructions
+## 👁️ Computer Vision System
 
-### 1. **Hardware Assembly**
+The system utilizes a **YOLO-World** (Zero-shot) detection engine, allowing the robot to identify specific crops or weeds without extensive localized training.
 
-1. Assemble the **4WD robot chassis**.
-2. Mount **ESP32 & Raspberry Pi** securely.
-3. Wire up **motors, sensors, sprayer & camera** (see [`docs/wiring_diagram.png`](./docs/wiring_diagram.png)).
+- **Trigger Logic:** When a plant enters the "Dosing Zone" and is confirmed by the AI, the system calculates the delay and activates the pumps.
+- **Monitoring:** Live inference data is relayed to the cloud for performance auditing.
 
-### 2. **Software Installation**
-
-1. Install YOLO & OpenCV on the Raspberry Pi:
-
-   ```bash
-   sudo apt update && sudo apt install python3-opencv
-   pip install torch torchvision ultralytics
-   ```
-2. Clone this repository:
-
-   ```bash
-   git clone https://github.com/xaatim/agri-robot-yolo.git
-   ```
-3. Flash the ESP32 with the motion & sensor control code (`esp32/agri_bot.ino` or `main.cpp`).
-
-### 3. **Run the System**
-
-* **Start YOLO detection:**
-
-  ```bash
-  python3 plant_detection.py
-  ```
-* **Control navigation:** via **web dashboard** (ESP32 Wi-Fi server) or manual joystick.
+![Vision Detection](docs/hardware/vision_ai_detection.png)
 
 ---
 
-## 📐 Prototype Sketch
+## ⚠️ Development Roadmap (v2 Transition)
 
-> *(Located in `extras/Prototype_sketch.png`)*
+**Note:** The current version of the Agri-Bot serves as a Proof of Concept. Engineering is currently underway to transition the platform from a semi-automated tool to a fully industrial autonomous unit.
 
-![Prototype Sketch](./extras/Prototype_sketch.jpg)
+### Current Limitations:
+The existing **fixed-arm** system, while functional, lacks the dexterity required for diverse crop heights and complex terrain. 
 
-*Figure: Mechanical design & assembly layout of the agriculture robot.*
-
----
-
-## 📷 Images & Screenshots
-
-* **Prototype Images:** `extras/prototype/`
-* **YOLO Detection Samples:** `extras/detections/`
-
-![Prototype](./extras/prototype/agri_bot_setup.jpg)
-*Figure: Semi-Autonomous Agriculture Robot prototype in testing phase.*
+### Future Integration (In Progress):
+- **ROS 2 Migration:** Moving the entire control stack to **ROS 2 Humble** for advanced path planning and industrial-grade reliability.
+- **Robotic Manipulator (4DOF/6DOF):** Replacing the fixed arm with a multi-axis robotic manipulator to allow for precise leaf-level application and 3D space maneuvering.
+- **Enhanced Autonomy:** Transitioning from semi-auto control to full-field autonomous navigation using LiDAR and GPS.
 
 ---
 
-## 🚀 Future Improvements
+## 🌐 Beam Robotics Integration
 
-* **AI-based Crop Disease Detection** using CNNs.
-* **GPS + Path Planning** for large-scale field navigation.
-* **Solar-Powered Operation** for extended field time.
-* **Cloud Dashboard** for remote monitoring & control.
+The Agri-Bot is a core product within the **Beam Robotics Ecosystem**. 
 
----
-
-## 📄 License
-
-This project is licensed under the **MIT License**. See [`LICENSE`](./LICENSE) for details.
+- **Secure Pairing:** Each unit is registered via a cryptographic serial key to the [Beam Command Center](https://github.com/xaatim/Beam-Command-Center).
+- **Centralized Dashboard:** Monitor dosing logs, chemical levels, and battery health remotely through the Beam user portal.
 
 ---
 
-## 👤 Author
+## 🚀 Installation & Usage
 
-**Hatim Ahmed Hassan** – 2025
-📧 **[xayari229@gmail.com](mailto:xayari229@gmail.com)**
+1. **Hardware:** Flash the `firmware/` directory to your ESP32/Arduino.
+2. **Software:** ```bash
+   pip install ultralytics socketio-client opencv-python
+   python agri_vision_main.py
+
+
 
 ---
 
+## Contributor
+
+**Hatim Ahmed Hassan** *Lead Architect & Co-Founder, Beam Robotics*
+
+## License
+
+Licensed under the MIT License.
