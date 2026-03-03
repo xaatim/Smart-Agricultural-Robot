@@ -28,7 +28,10 @@ The Agri-Bot is built on a modular architecture, with custom-designed 3D compone
 
 The project has moved from a digital-twin phase into physical field testing. The current prototype validates the software-to-hardware triggering loop.
 
-![Physical Prototype](docs/hardware/prototype_v1.png)
+<p align="center">
+  <img src="docs/hardware/prototype_v1.png" width="45%" />
+  <img src="docs/hardware/prototype_v2.png" width="45%" />
+</p>
 
 ---
 
@@ -39,7 +42,8 @@ The system utilizes a **YOLO-World** (Zero-shot) detection engine, allowing the 
 - **Trigger Logic:** When a plant enters the "Dosing Zone" and is confirmed by the AI, the system calculates the delay and activates the pumps.
 - **Monitoring:** Live inference data is relayed to the cloud for performance auditing.
 
-![Vision Detection](docs/hardware/vision_ai_detection.png)
+### 🎥 System Demonstration
+[https://github.com/user-attachments/assets/c4a1654d-c4e3-4ebb-b27a-4d20b6db65e0](https://github.com/user-attachments/assets/c4a1654d-c4e3-4ebb-b27a-4d20b6db65e0)
 
 ---
 
@@ -70,8 +74,8 @@ The Agri-Bot is a core product within the **Beam Robotics Ecosystem**.
 
 1. **Hardware:** Flash the `firmware/` directory to your ESP32/Arduino.
 2. **Software:** ```bash
-   pip install ultralytics socketio-client opencv-python
-   python agri_vision_main.py
+pip install ultralytics socketio-client opencv-python
+python agri_vision_main.py
 
 
 
@@ -84,3 +88,4 @@ The Agri-Bot is a core product within the **Beam Robotics Ecosystem**.
 ## License
 
 Licensed under the MIT License.
+
